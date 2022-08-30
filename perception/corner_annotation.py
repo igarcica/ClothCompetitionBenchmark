@@ -16,16 +16,11 @@ cv2.imshow('Cloth', img_1)
 img_2 = cv2.imread('cloth2.jpg')
 img_2 = cv2.resize(img_2, (1280,840))
 cv2.imshow('Corner', img_2)
-cv2.imshow('Test', img_2)
-#print("debug2")
 
 #Set variables
 corner= False
 corner_x = 0
 corner_y = 0
-first = True
-#vertices = np.array([[]])
-#print(vertices)
 
 def Mouse_Event(event, x, y, flags, param):
     #print("debug3")
@@ -57,37 +52,10 @@ def Vect_Event(event, x, y, flags, param):
             writer.writerow(data)
             filei.close()
 
-def Vect_Event(event, x, y, flags, param):
-    global first, vertices
-    if event == cv2.EVENT_LBUTTONDOWN:
-        if first:
-            vertices = np.array([[x,y]])
-            first = False
-        else:
-            #save point
-            vertices = np.append(vertices, np.array([[x,y]]), axis=0)
-            print(x,y)
-            print(vertices)
-            cv2.circle(img_2, (x, y), 10, (15,75,50), -1)
-            cv2.imshow('Test', img_2)
-    if event == cv2.EVENT_RBUTTONDOWN:
-        print("hola")
-        pts = vertices.reshape((-1,1,2))
-        cv2.polylines(img_2, [pts], True, (0,0,255), 3)
-        cv2.imshow('Test', img_2)
-        print(cv2.contourArea(vertices))
-        #Stop getting vertices
-        #Join last point with initial
-
-#Should be in code for Unfolding/Folding
-#pts = np.array( [[10,50], [400,50], [90,200], [50,500]], np.int32)# Let's now reshape our points in form  required by polylines
-#pts = pts.reshape((-1,1,2))
-#cv2.polylines(image, [pts], True, (0,0,255), 3)
 
 # set Mouse Callback method
 cv2.setMouseCallback('Cloth', Mouse_Event)
 cv2.setMouseCallback('Corner', Vect_Event)
-cv2.setMouseCallback('Test', Vect_Event)
 
 filei =open('test.csv','w')
 writer=csv.writer(filei)
