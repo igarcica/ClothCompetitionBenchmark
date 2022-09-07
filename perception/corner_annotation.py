@@ -5,17 +5,30 @@ import math
 import csv
 
 # read a colourful image
-img_1 = cv2.imread('cloth.jpg')
-img_1 = cv2.resize(img_1, (1280,840))
-#img_1 = cv2.resize(img_1, (320,210))
+img_path = 'rulebook/towel.jpg'
+
+
+img_1 = cv2.imread(img_path)
+#img_1 = cv2.resize(img_1, (1280,840))
+
+scale_percent = 40 # percent of original size
+width = int(img_1.shape[1] * scale_percent / 100)
+height = int(img_1.shape[0] * scale_percent / 100)
+dim = (width, height)
+# resize image
+img_1 = cv2.resize(img_1, dim, interpolation = cv2.INTER_AREA)
+
 # display the image
 cv2.imshow('Cloth', img_1)
+# read another image to display clicked colour
+img_2 = img_1
+cv2.imshow('Corner', img_2)
 
 #print("debug1")
 # read another image to display clicked colour
-img_2 = cv2.imread('cloth2.jpg')
-img_2 = cv2.resize(img_2, (1280,840))
-cv2.imshow('Corner', img_2)
+#img_2 = cv2.imread(img_path)
+#img_2 = cv2.resize(img_2, (1280,840))
+#cv2.imshow('Corner', img_2)
 
 #Set variables
 corner= False
