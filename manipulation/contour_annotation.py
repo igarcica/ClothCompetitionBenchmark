@@ -4,11 +4,18 @@ import cv2
 import math
 import csv
 
-px_cm_ratio = 9.25054
-px_cm_ratio_area = 85.56
+#px_cm_ratio = 9.25054
+#px_cm_ratio_area = 85.56
+#img = cv2.imread('rulebook/towel_wrinkle1.jpg')
 
-# read a colourful image
-img = cv2.imread('rulebook/towel_wrinkle1.jpg')
+px_cm_ratio = 11.967965888977051
+px_cm_ratio_area = 143.22
+img = cv2.imread('IMG_20221007_173630.jpg')
+
+px_cm_ratio = 15.931417083740234
+px_cm_ratio_area = 253.8
+img = cv2.imread('IMG_20221007_174129.jpg')
+
 print("Image dim: ", img.shape)
 scale_percent = 40 # percent of original size
 width = int(img.shape[1] * scale_percent / 100)
