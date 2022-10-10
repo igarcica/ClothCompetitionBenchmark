@@ -8,7 +8,7 @@ px_cm_ratio = 9.25054
 px_cm_ratio_area = 85.56
 
 # read a colourful image
-img = cv2.imread('rulebook/towel.jpg')
+img = cv2.imread('rulebook/towel_wrinkle1.jpg')
 print("Image dim: ", img.shape)
 scale_percent = 40 # percent of original size
 width = int(img.shape[1] * scale_percent / 100)
@@ -26,18 +26,25 @@ first = True
 #print(vertices)
 
 def Vect_Event(event, x, y, flags, param):
-    global first, vertices, px_cm_ratio
+    global first, vertices, px_cm_ratio, prev_x, prev_y
     if event == cv2.EVENT_LBUTTONDOWN:
         if first:
             vertices = np.array([[x,y]])
+            cv2.circle(img, (x, y), 5, (15,75,50), -1)
+            cv2.imshow('Test', img)
             first = False
+            prev_x = x
+            prev_y = y
         else:
             #save point
             vertices = np.append(vertices, np.array([[x,y]]), axis=0)
             print(x,y)
             print(vertices)
-            cv2.circle(img, (x, y), 5, (15,75,50), -1)
+            #cv2.circle(img, (x, y), 5, (15,75,50), -1)
+            cv2.line(img,(prev_x,prev_y),(x,y),(255,0,0),3)
             cv2.imshow('Test', img)
+            prev_x = x
+            prev_y = y
     if event == cv2.EVENT_RBUTTONDOWN:
         print("hola")
         pts = vertices.reshape((-1,1,2))
@@ -63,6 +70,11 @@ writer=csv.writer(filei)
 
 #print("debug5")
 cv2.waitKey(0)
+# Save points in csv
+filei.close()
+# Create folder for team (input team name)
+cv2.imwrite('rulebook/results/towel_wrinkle1.jpg', img) # Save with trial number
+
 cv2.destroyAllWindows()
 
 

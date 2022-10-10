@@ -8,8 +8,16 @@ Code to annotate corners in images. Using the mouse left button you can select a
 - Python3
 - Numpy: ``sudo apt-get install python3-numpy``
 - OpenCV: ``sudo apt-get install python3-opencv``
+- Pillow: ``sudo apt-get install python3-pil``
 
 ## Execution
+
+To generate the Aruco pattern for getting the pixel/centimeter ratio:
+``python3 aruco_pattern.py -o "aruco_markers.png" -i 10 -t "DICT_6X6_50" -d 72 -s 50 -m 20 x 3 -y 3``
+
+# Perception task
+
+Inside perception folder
 
 To annotate the corners at the image, run:
 ``python3 corner_annotation.py``
@@ -20,8 +28,11 @@ Over image window "Cloth" click on the corresponding corner. A circle of 10px of
 Grasping approach vector:
 Over image window "Corner" click on the point of the image that correspond to the end of the vector (origin will be the last annotated corner).
 
+# Manipulation tasks
+
 To set the contour of the cloth, run:
 ``python3 contour_annotation.py``
 
 To draw the contour, click in sequence the vertices that compose the contour. To close the contour press the mouse right button.
+
 
