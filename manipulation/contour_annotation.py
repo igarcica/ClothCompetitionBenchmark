@@ -16,6 +16,10 @@ px_cm_ratio = 15.931417083740234
 px_cm_ratio_area = 253.8
 img = cv2.imread('IMG_20221007_174129.jpg')
 
+px_cm_ratio = 10.700934600830077
+px_cm_ratio_area = 106.08
+img = cv2.imread('IMG_20221007_173646.jpg')
+
 print("Image dim: ", img.shape)
 scale_percent = 40 # percent of original size
 width = int(img.shape[1] * scale_percent / 100)

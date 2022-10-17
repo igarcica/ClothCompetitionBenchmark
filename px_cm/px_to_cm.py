@@ -17,6 +17,7 @@ import csv
 #img = cv2.imread('aruco_markers.png')
 #img = cv2.imread('test/IMG_20221007_173630.jpg')
 img = cv2.imread('test/IMG_20221007_174231.jpg')
+img = cv2.imread('test/IMG_20221007_173646.jpg')
 print("Image dim: ", img.shape)
 scale_percent = 40 # percent of original size
 width = int(img.shape[1] * scale_percent / 100)
@@ -59,36 +60,47 @@ for (markerCorner, markerID) in zip(corners, ids):
         # draw the ArUco marker ID on the img
         cv2.putText(img, str(markerID), (topLeft[0], topLeft[1] - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         # show the output img
-        cv2.imshow("Frame", img)
-        cv2.waitKey(0)
-        if(markerID==10):
+#        cv2.imshow("Frame", img)
+#        cv2.waitKey(0)
+        if(markerID==18):
             topL_x = cX
             topL_y = cY
-        if(markerID==12):
+        if(markerID==16):
             topR_x = cX
             topR_y = cY
-        if(markerID==16):
+        if(markerID==12):
             botL_x = cX
             botL_y = cY
-        if(markerID==18):
+        if(markerID==10):
             botR_x = cX
             botR_y = cY
 
+cv2.imshow("Frame", img)
+cv2.waitKey(0)
+
+cv2.circle(img, (topL_x, topL_y), 4, (0, 255, 0), -1)
+print("topL", topL_x, topL_y)
+print("topR", topR_x, topR_y)
+print("Resta x", topL_x-topR_x)
+print("Resta y", topL_y-topR_y)
+resta = topR_x-topL_x
+print("resta: ", resta)
 pts1 = np.float32([[topL_x, topL_y],[topR_x, topR_y],[botL_x, botL_y],[botR_x,botR_y]])
-pts2 = np.float32([[0,0],[200,0],[0,200],[200,200]])
+#pts2 = np.float32([[topL_x,topL_y],[topL_x,topR_y],[topL_x+226,topL_y],[topR_y,topR_y+226]])
+pts2 = np.float32([[topL_x,topL_y],[topL_x+resta,topL_y],[topL_x,topL_y+resta],[topL_x+resta,topL_y+resta]])
+#pts2 = np.float32([[0,0],[100,0],[0,100],[100,100]])
 #pts2 = np.float32([[0,0],[1080,0],[0,1080],[1080,1080]])
 #pts2 = np.float32([[0,0],[270,0],[0,310],[270,310]])
 M = cv2.getPerspectiveTransform(pts1,pts2)
 print(M)
-dst = cv2.warpPerspective(img,M,(200,200))
+dst = cv2.warpPerspective(img,M,(img.shape[1]+500,img.shape[0]+500))
 #dst = cv2.warpPerspective(img,M,(img.shape[1],img.shape[0]))
 cv2.imshow('dst', dst)
 cv2.waitKey(0)
 
-# Get center Aruco marker
+## Step 2 - Get center Aruco marker
 corners, ids, _ = cv2.aruco.detectMarkers(dst, aruco_dict, parameters=parameters)
 for (markerCorner, markerID) in zip(corners, ids):
-    print("hola")
     if(markerID==14): #center marker
         print("detectado")
         int_corners = np.int0(markerCorner)
@@ -98,13 +110,18 @@ for (markerCorner, markerID) in zip(corners, ids):
         
         # Aruco Perimeter
         aruco_perimeter = cv2.arcLength(markerCorner[0], True)
-        print("Aruco pixels: ", aruco_perimeter)
+        print("Aruco perimeter pixels: ", aruco_perimeter)
         
         # Pixel to cm ratio
         pixel_cm_ratio = aruco_perimeter / 20 # 20 is the Aruco perimeter in cm
         print("Pixel/centimeter ratio: ", pixel_cm_ratio) #Pixels/cm
 
-print("heh")
+        #Aruco area
+        aruco_area = cv2.contourArea(corners[0])
+        print("Aruco area: ", aruco_area)
+        pixel_cm_ratio_area = aruco_area / 25 # 20 is the Aruco perimeter in cm
+        print("Pixel2/centimer2 ratio (Area): ", pixel_cm_ratio_area) #Pixels2/cm2
+
 
 ### Draw polygon around the marker
 ##int_corners = np.int0(corners)
