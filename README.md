@@ -17,7 +17,10 @@ To generate the Aruco pattern for getting the pixel/centimeter ratio:
 
 ## Perception task
 
+
 Inside perception folder
+
+All this scripts can be executed separately to execute their features.
 
 To annotate the corners at the image, run:
 ``python3 corner_annotation.py``
@@ -27,6 +30,11 @@ Over image window "Cloth" click on the corresponding corner. A circle of 10px of
 
 Grasping approach vector:
 Over image window "Corner" click on the point of the image that correspond to the end of the vector (origin will be the last annotated corner).
+
+### Usage example
+
+In the root folder, run: 
+``python3 perception/perception.py -i 'test/IMG_20221007_174231.jpg' -ii 'test/IMG_20221007_174207.jpg' -o 'team2' -tt 1000``
 
 ## Manipulation tasks
 

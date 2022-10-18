@@ -5,6 +5,7 @@ import sys
 sys.path.insert(1, './px_cm/')
 import px_to_cm
 import corner_annotation as corner_an
+import perception_scoring as scoring
 
 # Get image with Aruco layout
 ap = argparse.ArgumentParser()
@@ -18,7 +19,7 @@ args = vars(ap.parse_args())
 
 if not os.path.exists(args["team"]):
     os.mkdir(args["team"])
-output_path = args["team"]
+team = args["team"]
 
 trial = args["trial"]
 
@@ -30,12 +31,16 @@ print("px to cm ratio: ", px_cm_ratio)
 print("px to cm AREA ratio: ", px_cm_area_ratio)
 
 # Define ground truth corners and grasping vectors
-groundtruth_img, corner_coord, vect_end_coord = corner_an.define_groundtruth(args["input"])
-print("Corner coordinates: ", corner_coord)
-print("Grasping vector end coordinates: ", vect_end_coord)
+groundtruth_img, corners_coord, vects_end_coord = corner_an.define_groundtruth(args["input"], team, trial)
+print("Corner coordinates: ", corners_coord)
+print("Grasping vector end coordinates: ", vects_end_coord)
+
+# Compute error corners
+scoring.get_error(team, trial, px_cm_ratio)
 
 # Compare corners - Error
 # Compare vectors (If corner correct) - Error
+# Ordenar puntos con sorted (de izq a derecha)
 
 
 

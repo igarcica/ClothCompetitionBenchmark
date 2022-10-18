@@ -100,9 +100,9 @@ else:
 
 # Save results
 # Contour image
-cv2.imwrite(output_path + "trial" + str(trial) + "_cont.jpg", contour_img) # Save with trial number
+cv2.imwrite(output_path + "/trial" + str(trial) + "_cont.jpg", contour_img) # Save with trial number
 # Measured perimeter and area
-filei =open(output_path + "trial" + str(trial) + '.csv','w')
+filei =open(output_path + "/trial" + str(trial) + '.csv','w')
 writer=csv.writer(filei)
 row = [px_cm_ratio, px_cm_area_ratio, cloth_per_px, cloth_area_px, cloth_per_cm, cloth_area_cm]
 writer.writerow(row)
