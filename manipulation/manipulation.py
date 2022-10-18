@@ -107,5 +107,6 @@ writer=csv.writer(filei)
 row = [px_cm_ratio, px_cm_area_ratio, cloth_per_px, cloth_area_px, cloth_per_cm, cloth_area_cm]
 writer.writerow(row)
 # Info trial (team, trial, config, object, ...), Ratios, perimeter + area (in px and cm), error, points
+#Towel Area: 4500cm2 = 45cm2, Perimeter: 280cm
 
 filei.close()

@@ -12,7 +12,6 @@ ap.add_argument("-i", "--ar_input", required=True, help="path to input image con
 ap.add_argument("-ii", "--input", required=True, help="path to input image containing result of the trial (cloth with perceived corners and vectors)")
 ap.add_argument("-o", "--team", required=True, type=str, default="Team", help="Team name")
 ap.add_argument("-tt", "--trial", required=True, type=int, default=1, help="Trial numbber")
-ap.add_argument("-obj", "--object", type=str, default="med_towel", help="Object from the Household Cloth Object Set")
 # number of correct corners
 args = vars(ap.parse_args())
 
