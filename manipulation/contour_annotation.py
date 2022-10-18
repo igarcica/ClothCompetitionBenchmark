@@ -87,10 +87,12 @@ def draw_contour(img_path):
     param = img
     cv2.setMouseCallback('Trial_img', Vect_Event, param)
     
-    filei =open('test.csv','w')
-    writer=csv.writer(filei)
+#    filei =open('test.csv','w')
+#    writer=csv.writer(filei)
     
     cv2.waitKey(0)
+    
+    contour_img = img
 
 #    # Save points in csv
 #    filei.close()
@@ -99,7 +101,7 @@ def draw_contour(img_path):
     
 #    cv2.destroyAllWindows()
 
-    return contour_perimeter, contour_area
+    return contour_img, contour_perimeter, contour_area
 
 ## Test code
 #path = 'test/IMG_20221007_173646.jpg'

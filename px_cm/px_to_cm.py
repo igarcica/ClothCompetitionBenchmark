@@ -11,15 +11,21 @@ import csv
 #cv.aruco.drawMarker(dictionary, 23, 200, markerImage, 1);
 #cv2.imwrite("marker23.png", markerImage);
 
+def ordenar_puntos(puntos):
+    n_puntos = np.concatenate([puntos[0], puntos[1], puntos[2], puntos[3]]).tolist()
+    y_order = sorted(n_puntos, key=lambda n_puntos: n_puntos[1])
+    x1_order = y_order[:2]
+    x1_order = sorted(x1_order, key=lambda x1_order: x1_order[0])
+    x2_order = y_order[2:4]
+    x2_order = sorted(x2_order, key=lambda x2_order: x2_order[0])
+    
+    return [x1_order[0], x1_order[1], x2_order[0], x2_order[1]]
 
 ###############################
 def transform_perspective(aruco_img_path):
-    print(aruco_img_path)
-    # Load image with aruco layout
-#    img = cv2.imread('test/IMG_20221007_174231.jpg')
-#    img = cv2.imread('test/IMG_20221007_173646.jpg')
-    img = cv2.imread(aruco_img_path)
-    print("Image dim: ", img.shape)
+    print("Getting px/cm ratio from: ", aruco_img_path)
+    img = cv2.imread(aruco_img_path) # Load image with aruco layout
+    #print("Image dim: ", img.shape)
     
     #Resize image to fit screen
     scale_percent = 40 # percent of original size
@@ -55,20 +61,19 @@ def transform_perspective(aruco_img_path):
             cX = int((topLeft[0] + bottomRight[0]) / 2.0)
             cY = int((topLeft[1] + bottomRight[1]) / 2.0)
             cv2.circle(img, (cX, cY), 4, (0, 0, 255), -1)
-            print(cX,cY)
             # draw the ArUco marker ID on the img
             cv2.putText(img, str(markerID), (topLeft[0], topLeft[1] - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             # show the output img
-            if(markerID==18):
+            if(markerID==12):#18):
                 topL_x = cX
                 topL_y = cY
-            if(markerID==16):
+            if(markerID==18):#16
                 topR_x = cX
                 topR_y = cY
-            if(markerID==12):
+            if(markerID==10):#12
                 botL_x = cX
                 botL_y = cY
-            if(markerID==10):
+            if(markerID==16):#10
                 botR_x = cX
                 botR_y = cY
     
@@ -76,20 +81,11 @@ def transform_perspective(aruco_img_path):
     cv2.waitKey(0)
     
     cv2.circle(img, (topL_x, topL_y), 4, (0, 255, 0), -1)
-    print("topL", topL_x, topL_y)
-    print("topR", topR_x, topR_y)
-    print("Resta x", topL_x-topR_x)
-    print("Resta y", topL_y-topR_y)
     resta = topR_x-topL_x
-    print("resta: ", resta)
     pts1 = np.float32([[topL_x, topL_y],[topR_x, topR_y],[botL_x, botL_y],[botR_x,botR_y]])
     #pts2 = np.float32([[topL_x,topL_y],[topL_x,topR_y],[topL_x+226,topL_y],[topR_y,topR_y+226]])
     pts2 = np.float32([[topL_x,topL_y],[topL_x+resta,topL_y],[topL_x,topL_y+resta],[topL_x+resta,topL_y+resta]])
-    #pts2 = np.float32([[0,0],[100,0],[0,100],[100,100]])
-    #pts2 = np.float32([[0,0],[1080,0],[0,1080],[1080,1080]])
-    #pts2 = np.float32([[0,0],[270,0],[0,310],[270,310]])
     M = cv2.getPerspectiveTransform(pts1,pts2)
-    print(M)
     dst = cv2.warpPerspective(img,M,(img.shape[1]+500,img.shape[0]+500))
     #dst = cv2.warpPerspective(img,M,(img.shape[1],img.shape[0]))
     cv2.imshow('dst', dst)
@@ -107,18 +103,18 @@ def transform_perspective(aruco_img_path):
             
             # Aruco Perimeter
             aruco_perimeter = cv2.arcLength(markerCorner[0], True)
-            print("Aruco perimeter pixels: ", aruco_perimeter)
+            #print("Aruco perimeter pixels: ", aruco_perimeter)
             
             # Pixel to cm ratio
             pixel_cm_ratio = aruco_perimeter / 20 # 20 is the Aruco perimeter in cm
-            print("Pixel/centimeter ratio: ", pixel_cm_ratio) #Pixels/cm
+            #print("Pixel/centimeter ratio: ", pixel_cm_ratio) #Pixels/cm
             #writer.writerow(pixel_cm_ratio)
     
             #Aruco area
             aruco_area = cv2.contourArea(corners[0])
-            print("Aruco area: ", aruco_area)
+            #print("Aruco area: ", aruco_area)
             pixel_cm_area_ratio = aruco_area / 25 # 20 is the Aruco perimeter in cm
-            print("Pixel2/centimer2 ratio (Area): ", pixel_cm_area_ratio) #Pixels2/cm2
+            #print("Pixel2/centimer2 ratio (Area): ", pixel_cm_area_ratio) #Pixels2/cm2
             #writer.writerow(pixel_cm_area_ratio)
 
     return pixel_cm_ratio, pixel_cm_area_ratio
