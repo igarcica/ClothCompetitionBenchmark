@@ -42,7 +42,7 @@ def Vect_Event(event, x, y, flags, param):
 #pts = pts.reshape((-1,1,2))
 #cv2.polylines(image, [pts], True, (0,0,255), 3)
 
-def draw_contour(img_path):
+def draw_contour(img_path, resize_percent):
     global contour_area, contour_perimeter, first
     
     #Set variables
@@ -54,7 +54,7 @@ def draw_contour(img_path):
     img = cv2.imread(img_path)
     # Resize image so it fits on the screen
     print("Image dim: ", img.shape)
-    scale_percent = 40 # percent of original size
+    scale_percent = resize_percent # percent of original size
     width = int(img.shape[1] * scale_percent / 100)
     height = int(img.shape[0] * scale_percent / 100)
     dim = (width, height)
@@ -68,6 +68,7 @@ def draw_contour(img_path):
     param = img
     cv2.setMouseCallback('Draw contour', Vect_Event, param)
     
+    print("\033[95m Action required! \033[0m Please, define the contour of the cloth")
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
@@ -81,12 +82,12 @@ def draw_contour(img_path):
     return contour_img, contour_perimeter, contour_area
 
 ## Test code
-img_path = 'test/IMG_20221007_173646.jpg'
-contour_img, contour_perimeter, contour_area = draw_contour(img_path)
-print("Contour area: ", contour_area)
-print("Contour perimeter: ", contour_perimeter)
-cv2.imshow("Contour Image", contour_img)
-cv2.waitKey(0)
+#img_path = 'test/IMG_20221007_173646.jpg'
+#contour_img, contour_perimeter, contour_area = draw_contour(img_path)
+#print("Contour area: ", contour_area)
+#print("Contour perimeter: ", contour_perimeter)
+#cv2.imshow("Contour Image", contour_img)
+#cv2.waitKey(0)
 
 
 

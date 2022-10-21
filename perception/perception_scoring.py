@@ -79,14 +79,14 @@ def get_grasping_v_error(team, trial, px_cm_ratio, tolerance, img_path):
     n_corners_gt = len(gt_data)
     n_corners_team = len(team_data)
 
-def get_corners_error(team, trial, px_cm_ratio, tolerance, img_path):
+def get_corners_error(team, trial, px_cm_ratio, tolerance, img_path, resize_percent):
 
     points = 0
     corners_error = []
 
     img = cv2.imread(img_path)
     # Resize image to fit the screen
-    scale_percent = 40 # percent of original size
+    scale_percent = resize_percent # percent of original size
     width = int(img.shape[1] * scale_percent / 100)
     height = int(img.shape[0] * scale_percent / 100)
     dim = (width, height)
@@ -188,8 +188,9 @@ def get_corners_error(team, trial, px_cm_ratio, tolerance, img_path):
 #px_cm_ratio = 9
 #tolerance = 2 # in cm
 #img_path
+#resize_percent=100
 #print("hola")
-#corners_errors, points = get_corners_error(team, trial, px_cm_ratio, tolerance, img_path)
+#corners_errors, points = get_corners_error(team, trial, px_cm_ratio, tolerance, img_path, resize_percent)
 #
 #print("Corners errors (in cm): ", corners_errors)
 #print("Total points: ", points)

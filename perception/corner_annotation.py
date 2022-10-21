@@ -59,9 +59,7 @@ def define_groundtruth(img_path, output_folder, trial):
     dim = (width, height)
     img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
 
-    print("\033[95m Action required! \033[0m Please, define ground truth for corners and their grasping approach vectors")
     cv2.imshow('Define groundtruth', img) 
-    
 
     # Create file to save results
     output_csv_file = output_folder + "/perception/trial" + str(trial) + "_gt.csv"
@@ -72,6 +70,7 @@ def define_groundtruth(img_path, output_folder, trial):
     param = img
     cv2.setMouseCallback('Define groundtruth', Mouse_Event, param)
     
+    print("\033[95m Action required! \033[0m Please, define ground truth for corners and their grasping approach vectors")
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 

@@ -11,14 +11,15 @@ import sys
 sys.path.insert(1, './px_cm/')
 import px_to_cm
 import contour_annotation as contour_an
-import scoring
+import manipulation_scoring as scoring
 
+resize_percent = 100 
 
 # Get image with Aruco layout
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--ar_input", required=True, help="path to input image containing ArUCo layout")
 ap.add_argument("-ii", "--input", required=True, help="path to input image containing result of the trial (folded or flat cloth)")
-ap.add_argument("-o", "--output", required=True, type=str, default="Team", help="Team name")
+ap.add_argument("-o", "--team", required=True, type=str, default="Team", help="Team name")
 ap.add_argument("-t", "--task", required=True, type=str, default="u", help="Task to score: Task 2.1 Unfolding (u) ot Task 2.2. Folding (f)")
 ap.add_argument("-tt", "--trial", required=True, type=int, default=1, help="Trial numbber")
 ap.add_argument("-obj", "--object", type=str, default="med_towel", help="Object from the Household Cloth Object Set")
@@ -26,10 +27,10 @@ ap.add_argument("-obj", "--object", type=str, default="med_towel", help="Object 
 args = vars(ap.parse_args())
 
 
-if not os.path.exists(args["output"]):
+if not os.path.exists(args["team"]):
 #    os.mkdir("./ " + args["team"])
-    os.mkdir(args["output"])
-output_path = args["output"]
+    os.mkdir(args["team"])
+team = args["team"]
 
 trial = args["trial"]
 
@@ -62,14 +63,12 @@ if CLOTH_SIZE.get(args["object"], None) is None:
 
 
 # Get px/cm ratio
-print("\033[94mGetting pixel/centimeter ratio... \033[0m")
-px_cm_ratio, px_cm_area_ratio = px_to_cm.transform_perspective(args["ar_input"])
-print("px to cm ratio: ", px_cm_ratio)
-print("px to cm AREA ratio: ", px_cm_area_ratio)
+print("\033[94m GETTING PIXEL/CENTIMETER RATIO \033[0m")
+px_cm_ratio, px_cm_area_ratio = px_to_cm.transform_perspective(args["ar_input"], resize_percent)
 
 # Get cloth perimeter and area in pixels
-print("\033[94mDraw the cloth contour\033[0m")
-contour_img, cloth_per_px, cloth_area_px = contour_an.draw_contour(args["input"])
+print("\033[94m DEFINE CONTOUR \033[0m")
+contour_img, cloth_per_px, cloth_area_px = contour_an.draw_contour(args["input"], resize_percent)
 print("Measured cloth perimeter (px): ", cloth_per_px)
 print("Measured cloth area (px): ", cloth_area_px)
 
@@ -84,25 +83,29 @@ print("Measured cloth area (cm): ", cloth_area_cm)
 if args["task"] == "u":
     #call unfolding scoring code
     print("\033[94mScoring Task 2.1. Unfolding!\033[0m")
+    task="Unfolding"
     size = (50,90)
     scoring.unfolding(CLOTH_SIZE.get(args["object"], None), cloth_per_cm)
 elif args["task"] == "f1":
     #call folding scoring code
     print("\033[94mScoring Task 2.2. Folding!\033[0m")
+    task="Folding"
     scoring.folding(CLOTH_SIZE.get(args["object"], None), cloth_per_cm, cloth_area_cm, 2)
 elif args["task"] == "f2":
     #call folding scoring code
     print("\033[94mScoring Task 2.2. Folding, second fold!\033[0m")
+    task="Folding"
     scoring.folding(CLOTH_SIZE.get(args["object"], None), cloth_per_cm, cloth_area_cm, 4)
 else:
     print("[INFO] Not a manipulation task. Please select unfolding (u) or folding (f). ")
     sys.exit(0)
 
+of="team_trials/"+team+"/"+task+"/scoring"
 # Save results
 # Contour image
-cv2.imwrite(output_path + "/trial" + str(trial) + "_cont.jpg", contour_img) # Save with trial number
+cv2.imwrite(team + "/trial" + str(trial) + "_cont.jpg", contour_img) # Save with trial number
 # Measured perimeter and area
-filei =open(output_path + "/trial" + str(trial) + '.csv','w')
+filei =open(team + "/trial" + str(trial) + '.csv','w')
 writer=csv.writer(filei)
 row = [px_cm_ratio, px_cm_area_ratio, cloth_per_px, cloth_area_px, cloth_per_cm, cloth_area_cm]
 writer.writerow(row)

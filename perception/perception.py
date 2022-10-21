@@ -9,6 +9,7 @@ import corner_annotation as corner_an
 import perception_scoring as scoring
 
 tolerance = 2 # Tolerance distant in cm
+resize_percent = 100 # Resizing percentage size from initial image size
 
 # Get image with Aruco layout
 ap = argparse.ArgumentParser()
@@ -28,8 +29,8 @@ trial = args["trial"]
 
 
 # Get px/cm ratio
-print("\033[94m GETTING PIZEL/CENTIMETER RATIO \033[0m")
-px_cm_ratio, px_cm_area_ratio = px_to_cm.transform_perspective(args["ar_input"])
+print("\033[94m GETTING PIXEL/CENTIMETER RATIO \033[0m")
+px_cm_ratio, px_cm_area_ratio = px_to_cm.transform_perspective(args["ar_input"], resize_percent)
 #print("--> px to cm ratio: ", px_cm_ratio)
 #print("--> px to cm AREA ratio: ", px_cm_area_ratio)
 
@@ -41,7 +42,7 @@ print("Grasping vector end coordinates: ", vects_end_coord)
 
 # Compute error corners
 print("\033[94m COMPUTE ERRORS \033[0m")
-corners_error, scoring = scoring.get_corners_error(team, trial, px_cm_ratio, tolerance, args["input"])
+corners_error, scoring = scoring.get_corners_error(team, trial, px_cm_ratio, tolerance, args["input"], resize_percent)
 
 # OK Compare corners - Error
 # Compare vectors (If corner correct) - Error
