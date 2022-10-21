@@ -11,8 +11,9 @@ import sys
 sys.path.insert(1, './px_cm/')
 import px_to_cm
 import contour_annotation as contour_an
-import scoring
+import manipulation_scoring as scoring
 
+resize_percent = 100 
 
 # Get image with Aruco layout
 ap = argparse.ArgumentParser()
@@ -62,14 +63,12 @@ if CLOTH_SIZE.get(args["object"], None) is None:
 
 
 # Get px/cm ratio
-print("\033[94mGetting pixel/centimeter ratio... \033[0m")
-px_cm_ratio, px_cm_area_ratio = px_to_cm.transform_perspective(args["ar_input"])
-print("px to cm ratio: ", px_cm_ratio)
-print("px to cm AREA ratio: ", px_cm_area_ratio)
+print("\033[94m GETTING PIXEL/CENTIMETER RATIO \033[0m")
+px_cm_ratio, px_cm_area_ratio = px_to_cm.transform_perspective(args["ar_input"], resize_percent)
 
 # Get cloth perimeter and area in pixels
-print("\033[94mDraw the cloth contour\033[0m")
-contour_img, cloth_per_px, cloth_area_px = contour_an.draw_contour(args["input"])
+print("\033[94m DEFINE CONTOUR \033[0m")
+contour_img, cloth_per_px, cloth_area_px = contour_an.draw_contour(args["input"], resize_percent)
 print("Measured cloth perimeter (px): ", cloth_per_px)
 print("Measured cloth area (px): ", cloth_area_px)
 

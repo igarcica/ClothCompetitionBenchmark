@@ -16,14 +16,14 @@ import csv
 #    return [x1_order[0], x1_order[1], x2_order[0], x2_order[1]]
 
 ###############################
-def transform_perspective(aruco_img_path):
+def transform_perspective(aruco_img_path, resize_percentage):
 
     print("Reading image with Aruco layout from: ", aruco_img_path)
     img = cv2.imread(aruco_img_path) # Load image with aruco layout
     #print("Image dim: ", img.shape)
     
     #Resize image to fit screen
-    scale_percent = 40 # percent of original size
+    scale_percent = resize_percentage # percent of original size
     width = int(img.shape[1] * scale_percent / 100)
     height = int(img.shape[0] * scale_percent / 100)
     dim = (width, height)
@@ -73,8 +73,8 @@ def transform_perspective(aruco_img_path):
                 botR_y = cY
     
     print("Detecting corner markers")
-    #cv2.imshow("Frame", img)
-    #cv2.waitKey(0)
+    cv2.imshow("Frame", img)
+    cv2.waitKey(0)
    
     print("Correcting image perspective")
     cv2.circle(img, (topL_x, topL_y), 4, (0, 255, 0), -1)
@@ -82,9 +82,9 @@ def transform_perspective(aruco_img_path):
     pts1 = np.float32([[topL_x, topL_y],[topR_x, topR_y],[botL_x, botL_y],[botR_x,botR_y]])
     pts2 = np.float32([[topL_x,topL_y],[topL_x+resta,topL_y],[topL_x,topL_y+resta],[topL_x+resta,topL_y+resta]])
     M = cv2.getPerspectiveTransform(pts1,pts2)
-    dst = cv2.warpPerspective(img,M,(img.shape[1]+500,img.shape[0]+500))
-    #cv2.imshow('dst', dst)
-    #cv2.waitKey(0)
+    dst = cv2.warpPerspective(img,M,(img.shape[1],img.shape[0]))
+    cv2.imshow('dst', dst)
+    cv2.waitKey(0)
 
     print("Getting px/cm ratio")
     ## Get center Aruco marker and compute px/cm ratio
@@ -94,8 +94,8 @@ def transform_perspective(aruco_img_path):
             # Draw polygon around the marker
             int_corners = np.int0(markerCorner)
             cv2.polylines(dst, int_corners, True, (0, 255, 0), 5)
-            #cv2.imshow('aruco', dst)
-            #cv2.waitKey(0)
+            cv2.imshow('aruco', dst)
+            cv2.waitKey(0)
             
             # Aruco Perimeter
             aruco_perimeter = cv2.arcLength(markerCorner[0], True)
