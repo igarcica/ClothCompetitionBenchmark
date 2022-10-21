@@ -33,7 +33,8 @@ Over image window "Corner" click on the point of the image that correspond to th
 
 ### Usage example
 
-In the root folder, run: 
+In the root folder, run:
+ 
 ``python3 perception/perception.py -i 'test/IMG_20221007_174231.jpg' -ii 'test/IMG_20221007_174207.jpg' -o 'team2' -tt 1000``
 
 ## Manipulation tasks
@@ -49,6 +50,7 @@ To draw the contour, click in sequence the vertices that compose the contour. To
 ### Usage example
 
 In the root folder, run:
+
 ``python3 manipulation/manipulation.py -i 'test/IMG_20221007_174231.jpg' -ii 'test/IMG_20221007_174149.jpg' -o 'team/' -t "f1" -tt 2 -obj "med_towel"``
 
 

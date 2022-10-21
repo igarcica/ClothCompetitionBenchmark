@@ -4,26 +4,21 @@ import cv2
 import math
 import csv
 
-##############################
-## Generate marker
-#cv.Mat markerImage;
-#cv.Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_50);
-#cv.aruco.drawMarker(dictionary, 23, 200, markerImage, 1);
-#cv2.imwrite("marker23.png", markerImage);
 
-def ordenar_puntos(puntos):
-    n_puntos = np.concatenate([puntos[0], puntos[1], puntos[2], puntos[3]]).tolist()
-    y_order = sorted(n_puntos, key=lambda n_puntos: n_puntos[1])
-    x1_order = y_order[:2]
-    x1_order = sorted(x1_order, key=lambda x1_order: x1_order[0])
-    x2_order = y_order[2:4]
-    x2_order = sorted(x2_order, key=lambda x2_order: x2_order[0])
-    
-    return [x1_order[0], x1_order[1], x2_order[0], x2_order[1]]
+#def ordenar_puntos(puntos):
+#    n_puntos = np.concatenate([puntos[0], puntos[1], puntos[2], puntos[3]]).tolist()
+#    y_order = sorted(n_puntos, key=lambda n_puntos: n_puntos[1])
+#    x1_order = y_order[:2]
+#    x1_order = sorted(x1_order, key=lambda x1_order: x1_order[0])
+#    x2_order = y_order[2:4]
+#    x2_order = sorted(x2_order, key=lambda x2_order: x2_order[0])
+#    
+#    return [x1_order[0], x1_order[1], x2_order[0], x2_order[1]]
 
 ###############################
 def transform_perspective(aruco_img_path):
-    print("Getting px/cm ratio from: ", aruco_img_path)
+
+    print("Reading image with Aruco layout from: ", aruco_img_path)
     img = cv2.imread(aruco_img_path) # Load image with aruco layout
     #print("Image dim: ", img.shape)
     
@@ -77,45 +72,42 @@ def transform_perspective(aruco_img_path):
                 botR_x = cX
                 botR_y = cY
     
-    cv2.imshow("Frame", img)
-    cv2.waitKey(0)
-    
+    print("Detecting corner markers")
+    #cv2.imshow("Frame", img)
+    #cv2.waitKey(0)
+   
+    print("Correcting image perspective")
     cv2.circle(img, (topL_x, topL_y), 4, (0, 255, 0), -1)
     resta = topR_x-topL_x
     pts1 = np.float32([[topL_x, topL_y],[topR_x, topR_y],[botL_x, botL_y],[botR_x,botR_y]])
-    #pts2 = np.float32([[topL_x,topL_y],[topL_x,topR_y],[topL_x+226,topL_y],[topR_y,topR_y+226]])
     pts2 = np.float32([[topL_x,topL_y],[topL_x+resta,topL_y],[topL_x,topL_y+resta],[topL_x+resta,topL_y+resta]])
     M = cv2.getPerspectiveTransform(pts1,pts2)
     dst = cv2.warpPerspective(img,M,(img.shape[1]+500,img.shape[0]+500))
-    #dst = cv2.warpPerspective(img,M,(img.shape[1],img.shape[0]))
-    cv2.imshow('dst', dst)
-    cv2.waitKey(0)
+    #cv2.imshow('dst', dst)
+    #cv2.waitKey(0)
 
-    ## Step 2 - Get center Aruco marker
+    print("Getting px/cm ratio")
+    ## Get center Aruco marker and compute px/cm ratio
     corners, ids, _ = cv2.aruco.detectMarkers(dst, aruco_dict, parameters=parameters)
     for (markerCorner, markerID) in zip(corners, ids):
         if(markerID==14): #center marker
             # Draw polygon around the marker
             int_corners = np.int0(markerCorner)
             cv2.polylines(dst, int_corners, True, (0, 255, 0), 5)
-            cv2.imshow('aruco', dst)
-            cv2.waitKey(0)
+            #cv2.imshow('aruco', dst)
+            #cv2.waitKey(0)
             
             # Aruco Perimeter
             aruco_perimeter = cv2.arcLength(markerCorner[0], True)
-            #print("Aruco perimeter pixels: ", aruco_perimeter)
             
             # Pixel to cm ratio
             pixel_cm_ratio = aruco_perimeter / 20 # 20 is the Aruco perimeter in cm
-            #print("Pixel/centimeter ratio: ", pixel_cm_ratio) #Pixels/cm
-            #writer.writerow(pixel_cm_ratio)
     
             #Aruco area
             aruco_area = cv2.contourArea(corners[0])
-            #print("Aruco area: ", aruco_area)
             pixel_cm_area_ratio = aruco_area / 25 # 20 is the Aruco perimeter in cm
-            #print("Pixel2/centimer2 ratio (Area): ", pixel_cm_area_ratio) #Pixels2/cm2
-            #writer.writerow(pixel_cm_area_ratio)
+            print("--> px to cm ratio: ", pixel_cm_ratio)
+            print("--> px to cm AREA ratio: ", pixel_cm_area_ratio)
 
     return pixel_cm_ratio, pixel_cm_area_ratio
 

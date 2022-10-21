@@ -1,5 +1,5 @@
 #TODOs:
-# - Save point + vector in csv
+# OK - Save point + vector in csv
 # - Create angle tolerance based on vector
 
 #!/usr/bin/env python
@@ -18,7 +18,7 @@ def Mouse_Event(event, x, y, flags, param):
         corner_x = x
         corner_y = y
         corner = True
-        print("Corner: (", x, ",", y, ")")
+        #print("Corner: (", x, ",", y, ")")
     elif event == cv2.EVENT_RBUTTONDOWN:
         if corner:
             cv2.line(img, (corner_x, corner_y), (x,y), (255,127,0), 5)
@@ -26,10 +26,10 @@ def Mouse_Event(event, x, y, flags, param):
             corner = False # To draw only one vector
             vect_end_x = x
             vect_end_y = y
-            print("Origin: (", corner_x, ",", corner_y, "), End: (", vect_end_x, ",", vect_end_y, ")")
-            print("Dif x: (", x-corner_x, ", ", y-corner_y, ")")
+            #print("Origin: (", corner_x, ",", corner_y, "), End: (", vect_end_x, ",", vect_end_y, ")")
+            #print("Dif x: (", x-corner_x, ", ", y-corner_y, ")")
             modulo = math.sqrt(pow(x,2)+pow(y,2))
-            print("Module: ", modulo)
+            #print("Module: ", modulo)
             data=[corner_x, corner_y, vect_end_x, vect_end_y]
             writer.writerow(data)
             corner_coord.append([corner_x, corner_y]) 
@@ -49,18 +49,23 @@ def define_groundtruth(img_path, output_folder, trial):
     vect_end_coord = []
 
     # Image to select corners
+    print("Reading plain image of trial ", trial, " from: ", img_path)
     img = cv2.imread(img_path)
+
     # Resize image to fit the screen
     scale_percent = 40 # percent of original size
     width = int(img.shape[1] * scale_percent / 100)
     height = int(img.shape[0] * scale_percent / 100)
     dim = (width, height)
     img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
+
+    print("\033[95m Action required! \033[0m Please, define ground truth for corners and their grasping approach vectors")
     cv2.imshow('Define groundtruth', img) 
     
 
     # Create file to save results
-    filei =open(output_folder + "/trial" + str(trial) + '_gt.csv','w')
+    output_csv_file = output_folder + "/perception/trial" + str(trial) + "_gt.csv"
+    filei =open(output_csv_file,'w')
     writer=csv.writer(filei)
 
     # set Mouse Callback method
@@ -72,12 +77,13 @@ def define_groundtruth(img_path, output_folder, trial):
 
     # Save points in csv
     filei.close()
-    # Create folder for team (input team name)
-    cv2.imwrite(output_folder + "/trial" + str(trial) + "_gt.jpg", img) # Save with trial number
+    output_img_file=output_folder + "/perception/trial" + str(trial) + "_gt.jpg"
+    cv2.imwrite(output_img_file, img) # Save with trial number
+    print("Saving ground truth image in: ", output_img_file, " and corner/end vector coordinates in ", output_csv_file)
 
 #Vector of corners, vector of vectors!
     groundtruth_img = img
-
+    
     return groundtruth_img, corner_coord, vect_end_coord
 
 

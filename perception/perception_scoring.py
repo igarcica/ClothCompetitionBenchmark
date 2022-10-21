@@ -26,8 +26,6 @@ from scipy.spatial import distance
 #import pandas as pd
 import csv
 
-tolerance = 1 # in cm
-points = 0
 
 def sort_corners(corners):
     y_order = sorted(corners, key=lambda corners: corners[1])
@@ -38,19 +36,65 @@ def sort_corners(corners):
 
     return [x1_order[0], x1_order[1], x2_order[0], x2_order[1]]
 
-#def get_px_cm_ratio():
-#    px_cm_file = csv.reader(open(px_cm_csv))
-#    for rows in px_cm_file:
-#        px_cm_team = rows
-#        print("px/cm ratio: ", px_cm_team)
-#
-def get_error(team, trial, px_cm_ratio):
-    global points
+def save_results(img_path, gt_corner, team_corner):
+    # Create image with results
+    print("\033[94m SHOWING RESULTS \033[0m")
+    # Plain image
+    print("Reading plain image of trial ", trial, " from: ", img_path)
+    img = cv2.imread(img_path)
+    # Read csvs files + plain image
+    # Paint GT and detected results
+    cv2.circle(img, (gt_corner[0], gt_corner[1]), 10, (15,75,50), -1) #GT color?
+    cv2.circle(img, (team_corner[0], team_corner[1]), 10, (15,75,50), -1) #Team color? Red?
+    cv2.imshow('Perception results', img)
+    cv2.waitKey(0)
+    output_img_file=output_folder + "/perception/trial" + str(trial) + "_results.jpg"
+    cv2.imwrite(output_img_file, img) # Save with trial number
 
-    print(team + "/trial" + str(trial) + '_gt.csv')
+def get_grasping_v_error(team, trial, px_cm_ratio, tolerance, img_path):
 
-    gt_file = csv.reader(open(team + "/trial" + str(trial) + '_gt.csv'))
-    team_file = csv.reader(open(team + "/trial" + str(trial) + '.csv'))
+    points = 0
+    corners_error = []
+
+    img = cv2.imread(img_path)
+    # Resize image to fit the screen
+    scale_percent = 40 # percent of original size
+    width = int(img.shape[1] * scale_percent / 100)
+    height = int(img.shape[0] * scale_percent / 100)
+    dim = (width, height)
+    img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
+
+    # Read CSV files with groundtruth and results
+    gt_file = csv.reader(open(team + "/perception/trial" + str(trial) + '_gt.csv'))
+    team_file = csv.reader(open(team + "/perception/trial" + str(trial) + '.csv'))
+    gt_data = []
+    team_data = []
+    for rows in gt_file:
+        gt_data.append(rows)
+    for rows in team_file:
+        team_data.append(rows)
+
+    team_data = sort_corners(team_data) # Order team corners as topl, topr, botl, botr
+
+    n_corners_gt = len(gt_data)
+    n_corners_team = len(team_data)
+
+def get_corners_error(team, trial, px_cm_ratio, tolerance, img_path):
+
+    points = 0
+    corners_error = []
+
+    img = cv2.imread(img_path)
+    # Resize image to fit the screen
+    scale_percent = 40 # percent of original size
+    width = int(img.shape[1] * scale_percent / 100)
+    height = int(img.shape[0] * scale_percent / 100)
+    dim = (width, height)
+    img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
+
+    # Read CSV files with groundtruth and results
+    gt_file = csv.reader(open(team + "/perception/trial" + str(trial) + '_gt.csv'))
+    team_file = csv.reader(open(team + "/perception/trial" + str(trial) + '.csv'))
     gt_data = []
     team_data = []
     for rows in gt_file:
@@ -64,53 +108,91 @@ def get_error(team, trial, px_cm_ratio):
     n_corners_team = len(team_data)
 
     # Check if number of corners detected coincides
+#    if n_corners_gt == n_corners_team:
+#        for i in range(n_corners_gt):
+#            gt_corner = np.array((int(gt_data[i][0]), int(gt_data[i][1])))
+#            team_corner = np.array((int(team_data[i][0]), int(team_data[i][1])))
+#            #dist = np.linalg.norm(a-b)
+#            dist = distance.euclidean(gt_corner, team_corner)
+#            dist_cm = dist/px_cm_ratio
+#            if dist_cm < tolerance:
+#                points += 1
+#                print("Corner ", i+1, " is correct = +1 point.  Error=", dist_cm)
+#            else:
+#                print("Error is > than tolerance! Distance between corners in cm is: ", dist_cm)
+#            corners_error.append(dist_cm)
+#
+#            # Paint GT and detected results
+#            cv2.circle(img, (gt_corner[0], gt_corner[1]), 10, (15,75,50), -1) #GT color?
+#            cv2.circle(img, (team_corner[0], team_corner[1]), 10, (0,0,255), -1) #Team color? Red?
+#            cv2.imshow('Perception results', img)
+#            cv2.waitKey(0)
+#    elif n_corners_gt > n_corners_team:
+#        print("Not all corners detected!")
+#        #Que hacer??? editar csv a mano?
+#    elif n_corners_gt < n_corners_team:
+#    print("Detected more number of corners than required")
+#    Compare GT and team points and get error from closest ones
+
     if n_corners_gt == n_corners_team:
-        for i in range(n_corners_gt):
-            gt_corner = np.array((int(gt_data[i][0]), int(gt_data[i][1])))
-            team_corner = np.array((int(team_data[i][0]), int(team_data[i][1])))
-            #dist = np.linalg.norm(a-b)
-            dist = distance.euclidean(gt_corner, team_corner)
-            dist_cm = dist/px_cm_ratio
-            if dist_cm < tolerance:
-                points += 1
-                print("Points: ", points)
-            else:
-                print("Distance of points in cm is: ", dist_cm)
-                print("Error is > than tolerance!")
-    else:
+        print("Same number of corners detected")
+    elif n_corners_gt > n_corners_team:
         print("Not all corners detected!")
-        #Que hacer??? editar csv a mano?
+    elif n_corners_gt < n_corners_team:
+        print("Detected more number of corners than required")
+
+    print(n_corners_gt, " corners in GT. ", n_corners_team, " detected corners")
+    for i in range(n_corners_gt):
+        print("Getting error of next corner")
+        prev_dist =100000
+        for j in range(n_corners_team):
+            gt_corner = np.array((int(gt_data[i][0]), int(gt_data[i][1])))
+            team_corner = np.array((int(team_data[j][0]), int(team_data[j][1])))
+            dist = distance.euclidean(gt_corner, team_corner)
+            #print("Team corner ", j, "error (in px):", dist) 
+            if dist < prev_dist:
+                prev_dist = dist
+                n_corner = j
+        # Score closest points
+        gt_corner = np.array((int(gt_data[i][0]), int(gt_data[i][1])))
+        team_corner = np.array((int(team_data[n_corner][0]), int(team_data[n_corner][1])))
+        dist = distance.euclidean(gt_corner, team_corner)
+        dist_cm = dist/px_cm_ratio
+        if dist_cm < tolerance:
+#            success=True
+            points += 1
+            print("Corner ", n_corner+1, " is correct = +1 point.  Error=", dist_cm)
+        else:
+#            success=False
+            print("Corner ", n_corner+1, " error is > than tolerance! Distance between closest corners in cm is: ", dist_cm)
+        corners_error.append(dist_cm)
+
+        # Paint GT and detected results
+        cv2.circle(img, (gt_corner[0], gt_corner[1]), 10, (15,75,50), -1) #GT color?
+        cv2.circle(img, (team_corner[0], team_corner[1]), 10, (0,0,255), -1) #Team color? Red?
+#        text_string = str(round(dist_cm))
+#        cv2.putText(img, text_string, (gt_corner[0], gt_corner[1]+50), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(15,75,50))
+        cv2.imshow('Perception results', img)
+        cv2.waitKey(0)
+        output_img_file=team + "/perception/trial" + str(trial) + "_results.jpg"
+        cv2.imwrite(output_img_file, img) # Save with trial number
 
 
-#def main(argv):
-#   global gt_csv, team_csv
-#   try:
-#      opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
-#   except getopt.GetoptError:
-#      print('perception.py -i <gt_csv> -o <team_csv>')
-#      sys.exit(2)
-#   for opt, arg in opts:
-#      if opt == '-h':
-#         print('perception.py -i <gt_csv> -o <team_csv>')
-#         sys.exit()
-#      elif opt in ("-i", "--ifile"):
-#         gt_csv = arg
-#      elif opt in ("-o", "--ofile"):
-#         team_csv = arg
-#   print('File with ground truth is "', gt_csv)
-#   print('File with team s result is "', team_csv)
-#
-#
-#if __name__=="__main__":
-#    main(sys.argv[1:])
-##    get_error()
-#
+
+
+    return corners_error, points
 
 ## Test code
 #team = 'team2'
 #trial = 1000
 #px_cm_ratio = 9
-#get_error(team, trial, px_cm_ratio)
+#tolerance = 2 # in cm
+#img_path
+#print("hola")
+#corners_errors, points = get_corners_error(team, trial, px_cm_ratio, tolerance, img_path)
+#
+#print("Corners errors (in cm): ", corners_errors)
+#print("Total points: ", points)
 
 
 
@@ -123,3 +205,5 @@ def get_error(team, trial, px_cm_ratio):
     #Compute difference between corners (check number of corners!)
 
 
+## NOTEs
+# To correct: If there is a false corners with which one do we relate it? (e.g. it could be that two detected corners are below tolerance of the same point)
