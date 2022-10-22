@@ -7,13 +7,14 @@ import numpy as np
 import cv2
 import math
 import csv
+from scipy.spatial import distance
 
 
 def Mouse_Event(event, x, y, flags, param):
     global corner, corner_x, corner_y, vect_end_x, vect_end_y, corner_coord, vect_end_coord
     img = param
     if event == cv2.EVENT_LBUTTONDOWN:
-        cv2.circle(img, (x, y), 3, (15,75,50), -1)
+        cv2.circle(img, (x, y), 5, (0,0,255), -1)
         cv2.imshow('Define groundtruth', img)
         corner_x = x
         corner_y = y
@@ -22,7 +23,7 @@ def Mouse_Event(event, x, y, flags, param):
     elif event == cv2.EVENT_RBUTTONDOWN:
         if corner:
             cv2.line(img, (corner_x, corner_y), (x,y), (255,127,0), 2)
-            cv2.circle(img, (corner_x, corner_y), 3, (15,75,50), -1)
+            cv2.circle(img, (corner_x, corner_y), 5, (0,0,255), -1)
             cv2.imshow('Define groundtruth', img)
             corner = False # To draw only one vector
             vect_end_x = x
@@ -35,6 +36,32 @@ def Mouse_Event(event, x, y, flags, param):
             writer.writerow(data)
             corner_coord.append([corner_x, corner_y]) 
             vect_end_coord.append([vect_end_x, vect_end_y])
+#            define_grasp_approach_range(img, corner_x, corner_y, vect_end_x, vect_end_y)
+
+
+def define_grasp_approach_range(img, corner_x, corner_y, vector_end_x, vector_end_y):
+    corner = np.array((corner_x, corner_y))
+    vector = np.array((vector_end_x, vector_end_y))
+    dist = distance.euclidean(corner, vector)
+    range1 = dist/math.sqrt(2)
+    print(range1)
+
+#    dif_x=vect_end_x-corner_x
+#    range1_x = corner_x+dif_x
+#    cv2.circle(img, (range1_x, corner_y), 5, (255,0,0), -1)
+#
+#    dif_y=vect_end_y-corner_y
+#    range2_y = corner_y+dif_y
+#    cv2.circle(img, (corner_x, range2_y), 5, (255,0,0), -1)
+#
+
+    range1_x = math.sin(45)*math.cos(45)*dist
+    range1_y = math.cos(45)*math.sin(45)*dist
+    print(range1_x, range1_y)
+    cv2.circle(img, (int(range1_x), int(range1_y)), 5, (255,0,0), -1)
+
+    cv2.imshow('Define groundtruth', img)
+    cv2.waitKey(0)
 
 
 def define_groundtruth(img_path, output_path, team, trial, resize_percent):

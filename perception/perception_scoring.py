@@ -94,7 +94,7 @@ def get_corners_error(img_path,input_path, output_path, team, trial, px_cm_ratio
     img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
 
     # Read CSV files with groundtruth and results
-    team_corners_path = input_path+"/trial_grasp_points_" + str(trial) + ".csv"
+    team_corners_path = input_path+"/detection_" + str(trial) + "_results.csv"
     gt_corners_path = output_path+"trial"+str(trial)+"_gt.csv"
     gt_file = csv.reader(open(gt_corners_path))
     team_file = csv.reader(open(team_corners_path))
@@ -171,8 +171,8 @@ def get_corners_error(img_path,input_path, output_path, team, trial, px_cm_ratio
         corners_error.append(dist_cm)
 
         # Paint GT and detected results
-        cv2.circle(img, (gt_corner[0], gt_corner[1]), 3, (15,75,50), -1) #GT color?
-        cv2.circle(img, (team_corner[0], team_corner[1]), 3, (0,0,255), -1) #Team color? Red?
+        cv2.circle(img, (gt_corner[0], gt_corner[1]), 5, (255,127,0), -1) #GT color?
+        cv2.circle(img, (team_corner[0], team_corner[1]), 5, (0,0,255), -1) #Team color? Red?
 #        text_string = str(round(dist_cm))
 #        cv2.putText(img, text_string, (gt_corner[0], gt_corner[1]+50), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(15,75,50))
         cv2.imshow('Perception results', img)

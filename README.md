@@ -62,8 +62,15 @@ In the root folder, run:
 
 ``python3 perception/perception.py -i 'aruco_gent.png' -ii 'trial_input_1.png' -o 'IDLab-AIRO' -tt 1``
 
+## Folding task
+
+``python3 manipulation/manipulation.py -i 'aruco_gent.png' -ii 'trial_intermediate_3.png' -o 'IDLab-AIRO' -t "f" -tt 3 -obj "cotton_napkin"``
 
 ## UMich team
+
+### Perception task
+
+`` python3 perception/perception.py -i 'tag_image_0_marked.png' -ii 'results_image_0.png' -o 'UMich-RD' -tt 1``
 
 ## AIS-Shinshu team
 
