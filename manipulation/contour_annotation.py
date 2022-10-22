@@ -26,9 +26,8 @@ def Vect_Event(event, x, y, flags, param):
     #Stop getting vertices
     #Join last point with initial
     if event == cv2.EVENT_RBUTTONDOWN:
-        print("End drawing contour")
         pts = vertices.reshape((-1,1,2))
-        cv2.polylines(img, [pts], True, (0,0,255), 3)
+        cv2.polylines(img, [pts], True, (255,0,0), 3)
         cv2.imshow('Draw contour', img)
 #        print("Area (px): ", cv2.contourArea(vertices))
 #        print("Area (cm): ", cv2.contourArea(vertices)/px_cm_ratio_area)

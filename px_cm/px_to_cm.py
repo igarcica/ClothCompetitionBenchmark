@@ -18,9 +18,12 @@ import csv
 ###############################
 def transform_perspective(aruco_img_path, resize_percentage):
 
+    pixel_cm_ratio = 0
+    pixel_cm_area_ratio = 0
+
     print("Reading image with Aruco layout from: ", aruco_img_path)
     img = cv2.imread(aruco_img_path) # Load image with aruco layout
-    #print("Image dim: ", img.shape)
+    print("Image dim: ", img.shape)
     
     #Resize image to fit screen
     scale_percent = resize_percentage # percent of original size
@@ -92,7 +95,7 @@ def transform_perspective(aruco_img_path, resize_percentage):
     print(corners)
     print(ids)
     for (markerCorner, markerID) in zip(corners, ids):
-        if(markerID==12): #center marker 14
+        if(markerID==10): #center marker 14
             # Draw polygon around the marker
             int_corners = np.int0(markerCorner)
             cv2.polylines(img, int_corners, True, (0, 255, 0), 5)
