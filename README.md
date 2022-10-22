@@ -54,5 +54,17 @@ In the root folder, run:
 ``python3 manipulation/manipulation.py -i 'test/IMG_20221007_174231.jpg' -ii 'test/IMG_20221007_174149.jpg' -o 'team/' -t "f1" -tt 2 -obj "med_towel"``
 
 
+# Competition scoring
+
+## IDLab-AIRO team
+
+### Perception task
+
+``python3 perception/perception.py -i 'aruco_gent.png' -ii 'trial_input_1.png' -o 'IDLab-AIRO' -tt 1``
+
+
+## UMich team
+
+## AIS-Shinshu team
 
 
