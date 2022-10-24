@@ -149,6 +149,8 @@ def get_corners_error(img_path,input_path, output_path, team, trial, px_cm_ratio
         print("Getting error of next corner")
         prev_dist =100000
         for j in range(n_corners_team):
+            gt_vector = np.array((int(gt_data[i][2]), int(gt_data[i][3])))
+            team_vector = np.array((int(team_data[j][2]), int(team_data[j][3])))
             gt_corner = np.array((int(gt_data[i][0]), int(gt_data[i][1])))
             team_corner = np.array((int(team_data[j][0]), int(team_data[j][1])))
             dist = distance.euclidean(gt_corner, team_corner)
@@ -159,6 +161,8 @@ def get_corners_error(img_path,input_path, output_path, team, trial, px_cm_ratio
         # Score closest points
         gt_corner = np.array((int(gt_data[i][0]), int(gt_data[i][1])))
         team_corner = np.array((int(team_data[n_corner][0]), int(team_data[n_corner][1])))
+        gt_vector = np.array((int(gt_data[i][2]), int(gt_data[i][3])))
+        team_vector = np.array((int(team_data[n_corner][2]), int(team_data[n_corner][3])))
         dist = distance.euclidean(gt_corner, team_corner)
         dist_cm = dist/px_cm_ratio
         if dist_cm < tolerance:
@@ -171,7 +175,9 @@ def get_corners_error(img_path,input_path, output_path, team, trial, px_cm_ratio
         corners_error.append(dist_cm)
 
         # Paint GT and detected results
-        cv2.circle(img, (gt_corner[0], gt_corner[1]), 3, (15,75,50), -1) #GT color?
+        cv2.line(img, (gt_corner[0], gt_corner[1]), (gt_vector[0], gt_vector[1]), (255,127,0), 2)
+        cv2.line(img, (team_corner[0], team_corner[1]), (team_vector[0], team_vector[1]), (0,0,255), 2)
+        cv2.circle(img, (gt_corner[0], gt_corner[1]), 3, (255,127,0), -1) #GT color?
         cv2.circle(img, (team_corner[0], team_corner[1]), 3, (0,0,255), -1) #Team color? Red?
 #        text_string = str(round(dist_cm))
 #        cv2.putText(img, text_string, (gt_corner[0], gt_corner[1]+50), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(15,75,50))
