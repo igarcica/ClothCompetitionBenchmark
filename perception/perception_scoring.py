@@ -94,7 +94,7 @@ def get_corners_error(img_path,input_path, output_path, team, trial, px_cm_ratio
     img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
 
     # Read CSV files with groundtruth and results
-    team_corners_path = input_path+"/trial_grasp_points_" + str(trial) + ".csv"
+    team_corners_path = input_path+"/detection_" + str(trial-1) + "_results.csv"
     gt_corners_path = output_path+"trial"+str(trial)+"_gt.csv"
     gt_file = csv.reader(open(gt_corners_path))
     team_file = csv.reader(open(team_corners_path))
