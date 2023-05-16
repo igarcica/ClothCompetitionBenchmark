@@ -12,8 +12,6 @@ activate_print=False
 
 def print_info(activate, arg1, arg2="", arg3="", arg4="", arg5="", arg6=""):
     if(activate):
-        #print(arg1)
-        #print(arg2)
         print(str(arg1) + str(arg2) + str(arg3) + str(arg4) + str(arg5) + str(arg6))
 
 #def ordenar_puntos(puntos):
@@ -123,8 +121,8 @@ def transform_perspective(aruco_img_path, resize_percentage):
             #Aruco area
             aruco_area = cv2.contourArea(corners[0])
             pixel_cm_area_ratio = aruco_area / 25 # 25 is the Aruco area in cm
-            print("\033[33m --> px to cm ratio: \033[0m", pixel_cm_ratio)
-            print("\033[33m  --> px to cm AREA ratio: \033[0m", pixel_cm_area_ratio)
+            print("\033[33m --> px to cm ratio: ", pixel_cm_ratio, "\033[0m")
+            print("\033[33m  --> px to cm AREA ratio: ", pixel_cm_area_ratio, "\033[0m")
 
     # #Debug
     # x,y,w,h = cv2.boundingRect(corners[0])
