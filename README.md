@@ -40,18 +40,18 @@ In the root folder, run:
 ## Manipulation tasks
 
 
-All this scripts can be executed separately to execute their features.
+<!--All this scripts can be executed separately to execute their features.
 
 To set the contour of the cloth, run:
 ``python3 contour_annotation.py``
 
-To draw the contour, click in sequence the vertices that compose the contour. To close the contour press the mouse right button.
+To draw the contour, click in sequence the vertices that compose the contour. To close the contour press the mouse right button.-->
 
 ### Usage example
 
 In the root folder, run:
 
-``python3 manipulation/manipulation.py -i 'test/IMG_20221007_174231.jpg' -ii 'test/IMG_20221007_174149.jpg' -o 'team/' -t "f1" -tt 2 -obj "med_towel"``
+``python3 manipulation/manipulation.py -i 'pattern.jpg' -x 'towel.jpg' -ii 'towel.jpg' -o 'team/' -t "u" -tt 2 -obj "med_towel"``
 
 
 # Competition scoring
