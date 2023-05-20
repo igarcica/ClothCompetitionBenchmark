@@ -7,24 +7,23 @@ import csv
 
 def Mouse_Event(event, x, y, flags, param):
     global first, vertices, px_cm_ratio, prev_x, prev_y, contour_area, contour_perimeter
+    
     img = param
     if event == cv2.EVENT_LBUTTONDOWN:
-        if first:
+        if first: # Vertices array initialization with first point
             vertices = np.array([[x,y]])
             cv2.circle(img, (x, y), 5, (15,75,50), -1)
             cv2.imshow('Draw contour', img)
             first = False
             prev_x = x
             prev_y = y
-        else:
-            #save point
+        else: # Continue filling vertices array with selected points
             vertices = np.append(vertices, np.array([[x,y]]), axis=0)
             cv2.line(img,(prev_x,prev_y),(x,y),(255,0,0),3)
             cv2.imshow('Draw contour', img)
             prev_x = x
             prev_y = y
-    #Stop getting vertices
-    #Join last point with initial
+    #Join last point with initial + Stop getting vertices
     if event == cv2.EVENT_RBUTTONDOWN:
         pts = vertices.reshape((-1,1,2))
         cv2.polylines(img, [pts], True, (255,0,0), 3)

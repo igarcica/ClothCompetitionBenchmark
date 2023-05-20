@@ -11,9 +11,13 @@ import csv
 
 def Mouse_Event(event, x, y, flags, param):
     global corner, corner_x, corner_y, vect_end_x, vect_end_y, corner_coord, vect_end_coord
-    img = param
+    
+    img = param[0]
+    px_cm = param[1]
+    corner_tolerance_error = px_cm*2 # How many pixel for 1cm
     if event == cv2.EVENT_LBUTTONDOWN:
-        cv2.circle(img, (x, y), 3, (15,75,50), -1)
+        #cv2.circle(img, (x, y), 5, (255,0,0), -1) # Draw corner 
+        cv2.circle(img, (x, y), int(corner_tolerance_error), (255,127,0), 2) # Draw corner detection tolerance #(15,75,50) 
         cv2.imshow('Define groundtruth', img)
         corner_x = x
         corner_y = y
@@ -21,23 +25,48 @@ def Mouse_Event(event, x, y, flags, param):
         #print("Corner: (", x, ",", y, ")")
     elif event == cv2.EVENT_RBUTTONDOWN:
         if corner:
-            cv2.line(img, (corner_x, corner_y), (x,y), (255,127,0), 2)
-            cv2.circle(img, (corner_x, corner_y), 3, (15,75,50), -1)
+            #cv2.line(img, (corner_x, corner_y), (x,y), (255,0,0), 2)
+            #cv2.circle(img, (corner_x, corner_y), 3, (15,75,50), -1)
             cv2.imshow('Define groundtruth', img)
             corner = False # To draw only one vector
             vect_end_x = x
             vect_end_y = y
-            #print("Origin: (", corner_x, ",", corner_y, "), End: (", vect_end_x, ",", vect_end_y, ")")
-            #print("Dif x: (", x-corner_x, ", ", y-corner_y, ")")
+            print("Origin: (", corner_x, ",", corner_y, "), End: (", vect_end_x, ",", vect_end_y, ")")
+            print("Dif x: (", x-corner_x, ", ", y-corner_y, ")")
             modulo = math.sqrt(pow(x,2)+pow(y,2))
-            #print("Module: ", modulo)
-            data=[corner_x, corner_y, vect_end_x, vect_end_y]
-            writer.writerow(data)
+            print("Module: ", modulo)
+            # data=[corner_x, corner_y, vect_end_x, vect_end_y]
+            # writer.writerow(data)
             corner_coord.append([corner_x, corner_y]) 
             vect_end_coord.append([vect_end_x, vect_end_y])
 
+            dir_x = x-corner_x
+            dir_y = y-corner_y
+            mid_point_x = corner_x+(dir_x/2)
+            mid_point_y = corner_y+(dir_y/2)
+            print("MID POINTS: ", mid_point_x, " / ", mid_point_y)
+            # p10 = mid_point_x + (dir_y/2)
+            # p11 = mid_point_x - (dir_y/2)
+            # p20 = mid_point_y + (dir_x/2)
+            # p21 = mid_point_y - (dir_x/2)
+            p10 = mid_point_x - (dir_y/2)
+            p11 = mid_point_y + (dir_x/2)
+            p20 = mid_point_x + (dir_y/2)
+            p21 = mid_point_y - (dir_x/2)
+            print("PONTS: ", p10, " / ", p11, " / ", p20, " / ", p21)
+            cv2.line(img, (corner_x, corner_y), (int(p10),int(p11)), (255,127,0), 2)
+            cv2.line(img, (corner_x, corner_y), (int(p20),int(p21)), (255,127,0), 2)
+            # cv2.circle(img, (int(p10), int(p20)), 3, (15,75,50), -1)
+            # cv2.circle(img, (int(p11), int(p21)), 3, (15,75,50), -1)
+            cv2.imshow('Define groundtruth', img)
 
-def define_groundtruth(img_path, output_path, team, trial, resize_percent):
+
+
+            # if(dir_x>dir_y):
+
+
+
+def define_groundtruth(img_path, output_path, team, trial, resize_percent, px_cm_ratio):
     global corner, corner_x, corner_y, vect_end_x, vect_end_y, corner_coord, vect_end_coord, writer
    
     #Set internal variables
@@ -50,40 +79,40 @@ def define_groundtruth(img_path, output_path, team, trial, resize_percent):
     vect_end_coord = []
 
     # Image to select corners
-    print("Reading plain image of trial ", trial, " from: ", img_path)
+    #print("Reading plain image of trial ", trial, " from: ", img_path)
+    print("\033[94m Reading image: \033[0m", img_path)
     img = cv2.imread(img_path)
-
     # Resize image to fit the screen
     scale_percent = resize_percent # percent of original size
     width = int(img.shape[1] * scale_percent / 100)
     height = int(img.shape[0] * scale_percent / 100)
     dim = (width, height)
     img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
-
     cv2.imshow('Define groundtruth', img) 
 
-    # Create file to save results
-#    output_csv_file = team + "/perception/trial" + str(trial) + "_gt.csv"
-    output_csv_file=output_path+"trial"+str(trial)+"_gt.csv"
-    filei =open(output_csv_file,'w')
-    writer=csv.writer(filei)
+    # # Create file to save results
+    # # output_csv_file = team + "/perception/trial" + str(trial) + "_gt.csv"
+    # output_csv_file=output_path+"trial"+str(trial)+"_gt.csv"
+    # filei =open(output_csv_file,'w')
+    # writer=csv.writer(filei)
 
     # set Mouse Callback method
-    param = img
+    param = [img, px_cm_ratio]
     cv2.setMouseCallback('Define groundtruth', Mouse_Event, param)
     
     print("\033[95m Action required! \033[0m Please, define ground truth for corners and their grasping approach vectors")
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    print("\033[96m Ended defining GT corners \033[0m")
 
-    # Save points in csv
-    filei.close()
-#    output_img_file=output_folder + "/perception/trial" + str(trial) + "_gt.jpg"
-    output_img_file=output_path+"trial"+str(trial)+"_gt.jpg"
-    cv2.imwrite(output_img_file, img) # Save with trial number
-    print("Saving ground truth image in: ", output_img_file, " and corner/end vector coordinates in ", output_csv_file)
+    # # Save points in csv
+    # filei.close()
+    # #output_img_file=output_folder + "/perception/trial" + str(trial) + "_gt.jpg"
+    # output_img_file=output_path+"trial"+str(trial)+"_gt.jpg"
+    # cv2.imwrite(output_img_file, img) # Save with trial number
+    # print("Saving ground truth image in: ", output_img_file, " and corner/end vector coordinates in ", output_csv_file)
 
-#Vector of corners, vector of vectors!
+    # Vector of corners, vector of vectors!
     groundtruth_img = img
     
     return groundtruth_img, corner_coord, vect_end_coord
