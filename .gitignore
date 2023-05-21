@@ -1,0 +1,7 @@
+borrar/
+manipulation/__pycache__/
+perception/__pycache__/
+px_cm/__pycache__/
+perception/__pycache__/corner_annotation.cpython-38.pyc
+perception/__pycache__/perception_scoring.cpython-38.pyc
+px_cm/__pycache__/px_to_cm.cpython-38.pyc
