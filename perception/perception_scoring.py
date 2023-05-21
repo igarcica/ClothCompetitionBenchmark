@@ -110,32 +110,32 @@ def get_corners_error(img_path,input_path, output_path, team, trial, px_cm_ratio
     n_corners_gt = len(gt_data)
     n_corners_team = len(team_data)
 
-    # Check if number of corners detected coincides
-#    if n_corners_gt == n_corners_team:
-#        for i in range(n_corners_gt):
-#            gt_corner = np.array((int(gt_data[i][0]), int(gt_data[i][1])))
-#            team_corner = np.array((int(team_data[i][0]), int(team_data[i][1])))
-#            #dist = np.linalg.norm(a-b)
-#            dist = distance.euclidean(gt_corner, team_corner)
-#            dist_cm = dist/px_cm_ratio
-#            if dist_cm < tolerance:
-#                points += 1
-#                print("Corner ", i+1, " is correct = +1 point.  Error=", dist_cm)
-#            else:
-#                print("Error is > than tolerance! Distance between corners in cm is: ", dist_cm)
-#            corners_error.append(dist_cm)
-#
-#            # Paint GT and detected results
-#            cv2.circle(img, (gt_corner[0], gt_corner[1]), 10, (15,75,50), -1) #GT color?
-#            cv2.circle(img, (team_corner[0], team_corner[1]), 10, (0,0,255), -1) #Team color? Red?
-#            cv2.imshow('Perception results', img)
-#            cv2.waitKey(0)
-#    elif n_corners_gt > n_corners_team:
-#        print("Not all corners detected!")
-#        #Que hacer??? editar csv a mano?
-#    elif n_corners_gt < n_corners_team:
-#    print("Detected more number of corners than required")
-#    Compare GT and team points and get error from closest ones
+    # # Check if number of corners detected coincides
+    # if n_corners_gt == n_corners_team:
+    #     for i in range(n_corners_gt):
+    #         gt_corner = np.array((int(gt_data[i][0]), int(gt_data[i][1])))
+    #         team_corner = np.array((int(team_data[i][0]), int(team_data[i][1])))
+    #         #dist = np.linalg.norm(a-b)
+    #         dist = distance.euclidean(gt_corner, team_corner)
+    #         dist_cm = dist/px_cm_ratio
+    #         if dist_cm < tolerance:
+    #             points += 1
+    #             print("Corner ", i+1, " is correct = +1 point.  Error=", dist_cm)
+    #         else:
+    #             print("Error is > than tolerance! Distance between corners in cm is: ", dist_cm)
+    #         corners_error.append(dist_cm)
+
+    #         # Paint GT and detected results
+    #         cv2.circle(img, (gt_corner[0], gt_corner[1]), 10, (15,75,50), -1) #GT color?
+    #         cv2.circle(img, (team_corner[0], team_corner[1]), 10, (0,0,255), -1) #Team color? Red?
+    #         cv2.imshow('Perception results', img)
+    #         cv2.waitKey(0)
+    # elif n_corners_gt > n_corners_team:
+    #     print("Not all corners detected!")
+    #     #Que hacer??? editar csv a mano?
+    # elif n_corners_gt < n_corners_team:
+    # print("Detected more number of corners than required")
+    # #Compare GT and team points and get error from closest ones
 
     if n_corners_gt == n_corners_team:
         print("Same number of corners detected")
@@ -166,11 +166,11 @@ def get_corners_error(img_path,input_path, output_path, team, trial, px_cm_ratio
         dist = distance.euclidean(gt_corner, team_corner)
         dist_cm = dist/px_cm_ratio
         if dist_cm < tolerance:
-#            success=True
+            #success=True
             points += 1
             print("Corner ", n_corner+1, " is correct = +1 point.  Error=", dist_cm)
         else:
-#            success=False
+            #success=False
             print("Corner ", n_corner+1, " error is > than tolerance! Distance between closest corners in cm is: ", dist_cm)
         corners_error.append(dist_cm)
 
@@ -179,8 +179,8 @@ def get_corners_error(img_path,input_path, output_path, team, trial, px_cm_ratio
         cv2.line(img, (team_corner[0], team_corner[1]), (team_vector[0], team_vector[1]), (0,0,255), 2)
         cv2.circle(img, (gt_corner[0], gt_corner[1]), 3, (255,127,0), -1) #GT color?
         cv2.circle(img, (team_corner[0], team_corner[1]), 3, (0,0,255), -1) #Team color? Red?
-#        text_string = str(round(dist_cm))
-#        cv2.putText(img, text_string, (gt_corner[0], gt_corner[1]+50), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(15,75,50))
+        # text_string = str(round(dist_cm))
+        # cv2.putText(img, text_string, (gt_corner[0], gt_corner[1]+50), fontFace=cv2.FONT_HERSHEY_TRIPLEX, fontScale=1, color=(15,75,50))
         cv2.imshow('Perception results', img)
         cv2.waitKey(0)
 
@@ -190,8 +190,6 @@ def get_corners_error(img_path,input_path, output_path, team, trial, px_cm_ratio
 
         cv2.imshow("Result image", img)
         cv2.waitKey(0)
-
-
 
     return img, corners_error, points
 

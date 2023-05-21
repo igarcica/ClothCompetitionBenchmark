@@ -35,7 +35,7 @@ Over image window "Corner" click on the point of the image that correspond to th
 
 In the root folder, run:
  
-``python3 perception/perception.py -i 'test/IMG_20221007_174231.jpg' -ii 'test/IMG_20221007_174207.jpg' -o 'team2' -tt 1000``
+``python3 perception/perception.py -i 'pattern.jpg' -p 'towel.jpg' -ii 'towel_markers.jpg' -o 'test' -tt 1000``
 
 ## Manipulation tasks
 

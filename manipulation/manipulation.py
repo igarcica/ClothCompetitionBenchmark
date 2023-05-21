@@ -86,6 +86,14 @@ def print_info(activate, arg1, arg2="", arg3="", arg4="", arg5="", arg6=""):
     if(activate):
         print(str(arg1) + str(arg2) + str(arg3) + str(arg4) + str(arg5) + str(arg6))
 
+# def save_results(file_name, data, img):
+#     ## Save results
+#     np.savetxt(output_path+"u_vertices.csv", u_vertices, fmt='%s', delimiter=",")   # Save vertices of defined contour
+#     text_loc = u_contour_img.shape
+#     #cv2.rectangle(u_contour_img, (int((text_loc[1]/2)-100), int(text_loc[0]-50)), (int(text_loc[1]/2), int(text_loc[0])), (255,255,255), -1)
+#     text = "Error: " + str(round(abs(u_percentage_area_error),2)) +"%"
+#     cv2.putText(u_contour_img, text, (int((text_loc[1]/2)-100), int(text_loc[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2)
+#     cv2.imwrite(output_path+"u_result.jpg", u_contour_img)                # Save image with defined contour
 
 
 ##### GET PX/CM RATIO ####

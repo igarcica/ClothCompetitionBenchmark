@@ -4,6 +4,7 @@ import csv
 import argparse
 import os
 import sys
+import numpy as np
 sys.path.insert(1, './px_cm/')
 import px_to_cm
 import corner_annotation as corner_an
@@ -13,11 +14,13 @@ tolerance = 2 # Tolerance distant in cm
 resize_percent = 30 # Resizing percentage size from initial image size
 
 test = True
+activate_print = True
 
 # Get image with Aruco layout
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--ar_input", required=True, help="path to input image containing ArUCo layout")
-ap.add_argument("-ii", "--input", required=True, help="path to input plain trial image (without markers)")
+ap.add_argument("-p", "--plain", required=True, help="path to input plain image (without markers)")
+ap.add_argument("-ii", "--input", required=True, help="path to input trial image (with markers)")
 ap.add_argument("-o", "--team", required=True, type=str, default="Team", help="Team name")
 ap.add_argument("-tt", "--trial", required=True, type=int, default=1, help="Trial numbber")
 # number of correct corners
@@ -33,27 +36,87 @@ trial = args["trial"]
 if test:
     team_trials_path = "test/"
     output_path="test/scoring/"
+    plain_img_path=team_trials_path+args["plain"]
+    trial_img_path=team_trials_path+args["input"]
+    aruco_img_path=team_trials_path+args["ar_input"]
 else:
     team_trials_path = "teams_trials/"+team+"/Perception/"
     output_path="teams_trials/"+team+"/Perception/scoring/"
+    plain_img_path=team_trials_path+args["plain"]
+    trial_img_path=team_trials_path+args["input"]
+    aruco_img_path=team_trials_path+args["ar_input"]
 
 
 def print_info(activate, arg1, arg2="", arg3="", arg4="", arg5="", arg6=""):
     if(activate):
         print(str(arg1) + str(arg2) + str(arg3) + str(arg4) + str(arg5) + str(arg6))
 
+
+##### RESIZE IMAGE to fit screen and draw GT #####
+def decrease_image(img_path):
+    print("\033[94m Reading image: \033[0m", img_path)
+    print("\033[94m Resizing image to a ", resize_percent, " % \033[0m")
+    img = cv2.imread(img_path) # Load image with aruco layout
+    print_info(activate_print, "Original image dim: ", img.shape)
+    width = int(img.shape[1] * resize_percent / 100)
+    height = int(img.shape[0] * resize_percent / 100)
+    dim = (width, height)
+    res_img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA) 
+    print_info(activate_print, "Resized image to ", resize_percent, "% -> New dim: ", res_img.shape)
+
+    return res_img
+
+def increase_image(img):
+    print("\033[94m Restoring image size: \033[0m")
+    #print_info(activate_print, "Original image dim: ", img.shape)
+    #print("\033[94m Resizing image to a ", resize_percent, " % \033[0m")
+    width = int(img.shape[1] / (resize_percent/100))
+    height = int(img.shape[0] / (resize_percent/100))
+    dim = (width, height)
+    res_img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA) 
+    print_info(activate_print, "Resized image: ", res_img.shape)
+
+    return res_img
+
+
 ##### GET PX/CM RATIO ####
 print("\033[94m GETTING PIXEL/CENTIMETER RATIO \033[0m")
-aruco_img_path=team_trials_path+args["ar_input"]
-px_cm_ratio, px_cm_area_ratio = px_to_cm.transform_perspective(aruco_img_path, resize_percent)
+#aruco_img_path=team_trials_path+args["ar_input"]
+#px_cm_ratio, px_cm_area_ratio = px_to_cm.transform_perspective(aruco_img_path, resize_percent)
+aruco_img = decrease_image(aruco_img_path)
+px_cm_ratio, px_cm_area_ratio = px_to_cm.transform_perspective(aruco_img)
 
 
+##### DEFINE GT #####
 # Define ground truth corners and grasping vectors
 print("\033[94m DEFINE GROUND TRUTH \033[0m")
-trial_img_path=team_trials_path+args["input"]
-groundtruth_img, corners_coord, vects_end_coord = corner_an.define_groundtruth(trial_img_path, output_path, team, trial, resize_percent, px_cm_ratio)
+#trial_img_path=team_trials_path+args["input"]
+#groundtruth_img, corners_coord, vects_end_coord = corner_an.define_groundtruth(trial_img_path, output_path, team, trial, resize_percent, px_cm_ratio)
+plain_img = decrease_image(plain_img_path)
+trial_img = decrease_image(trial_img_path)
+groundtruth_img, trial_gt_img, results, corners_coord, vects_end_coord = corner_an.define_groundtruth(plain_img, trial_img, output_path, team, trial, px_cm_ratio)
+
 print("Corner coordinates: ", corners_coord)
 print("Grasping vector end coordinates: ", vects_end_coord)
+## Save results
+groundtruth_img = increase_image(groundtruth_img)
+trial_gt_img = increase_image(trial_gt_img)
+np.savetxt(output_path+"gt_corners.csv", results, fmt='%s', delimiter=",")   # Save vertices of defined contour
+cv2.imwrite(output_path+"gt.jpg", groundtruth_img)
+cv2.imwrite(output_path+"gt_trial.jpg", trial_gt_img)
+
+# gt_corners_path = output_path+"gt_corners.csv"
+# gt_file = csv.reader(open(gt_corners_path))
+# gt_data = []
+# for rows in gt_file:
+#     gt_data.append(rows)
+# print(gt_data)
+# corner_tolerance_errorpx_cm*2
+# cv2.circle(img, (x, y), int(corner_tolerance_error), (255,127,0), 2) # Draw corner detection tolerance #(15,75,50) 
+    
+
+
+
 
 # # # Resize image (too small)
 # # width = int(groundtruth_img.shape[1] * 300 / 100)
@@ -67,6 +130,11 @@ print("Grasping vector end coordinates: ", vects_end_coord)
 # # output_img_file=output_path+"trial"+str(trial)+"_gt.jpg"
 # # cv2.imwrite(output_img_file, img) # Save with trial number
 
+
+## GT image
+## Plain image
+## trial result
+## Eval
 
 # # Compute error corners
 # print("\033[94m COMPUTE ERRORS \033[0m")

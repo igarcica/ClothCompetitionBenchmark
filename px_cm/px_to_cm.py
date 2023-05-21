@@ -25,29 +25,29 @@ def print_info(activate, arg1, arg2="", arg3="", arg4="", arg5="", arg6=""):
 #    return [x1_order[0], x1_order[1], x2_order[0], x2_order[1]]
 
 ###############################
-def transform_perspective(aruco_img_path, resize_percentage):
+def transform_perspective(aruco_img):
     print("\033[96m Transforming perspective... \033[0m")
 
     pixel_cm_ratio = 0
     pixel_cm_area_ratio = 0
 
-    print("\033[94m Reading image with Aruco layout: \033[0m", aruco_img_path)
-    img = cv2.imread(aruco_img_path) # Load image with aruco layout
-    print_info(activate_print, "Original image dim: ", img.shape)
-    #Resize image to fit screen
-    scale_percent = resize_percentage # percent of original size
-    width = int(img.shape[1] * scale_percent / 100)
-    height = int(img.shape[0] * scale_percent / 100)
-    dim = (width, height)
-    img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA) 
-    print_info(activate_print, "Resized image to ", resize_percentage, "% -> New dim: ", img.shape)
+    # print("\033[94m Reading image with Aruco layout: \033[0m", aruco_img_path)
+    # img = cv2.imread(aruco_img_path) # Load image with aruco layout
+    # print_info(activate_print, "Original image dim: ", img.shape)
+    # #Resize image to fit screen
+    # scale_percent = resize_percentage # percent of original size
+    # width = int(img.shape[1] * scale_percent / 100)
+    # height = int(img.shape[0] * scale_percent / 100)
+    # dim = (width, height)
+    # img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA) 
+    # print_info(activate_print, "Resized image to ", resize_percentage, "% -> New dim: ", img.shape)
     
     # Load Aruco detector
     parameters = cv2.aruco.DetectorParameters_create()
     aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
     
     # Get Aruco marker
-    corners, ids, _ = cv2.aruco.detectMarkers(img, aruco_dict, parameters=parameters)
+    corners, ids, _ = cv2.aruco.detectMarkers(aruco_img, aruco_dict, parameters=parameters)
     
     # for (markerCorner, markerID) in zip(corners, ids):
     #     # extract the marker corners (which are always returned in top-left, top-right, bottom-right, and bottom-left order)
@@ -108,8 +108,8 @@ def transform_perspective(aruco_img_path, resize_percentage):
         if(markerID==10): #center marker 14
             # Draw polygon around the marker
             int_corners = np.int0(markerCorner)
-            cv2.polylines(img, int_corners, True, (0, 255, 0), 5)
-            cv2.imshow('aruco', img)
+            cv2.polylines(aruco_img, int_corners, True, (0, 255, 0), 5)
+            cv2.imshow('aruco', aruco_img)
             cv2.waitKey(0)
             
             # Aruco Perimeter
