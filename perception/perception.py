@@ -11,18 +11,18 @@ import corner_annotation as corner_an
 import perception_scoring as scoring
 
 tolerance = 2 # Tolerance distant in cm
-resize_percent = 30 # Resizing percentage size from initial image size
+resize_percent = 300 # Resizing percentage size from initial image size
 
-test = True
+test = False
 activate_print = True
 
 # Get image with Aruco layout
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--ar_input", required=True, help="path to input image containing ArUCo layout")
 ap.add_argument("-p", "--plain", required=True, help="path to input plain image (without markers)")
-ap.add_argument("-ii", "--input", required=True, help="path to input trial image (with markers)")
+ap.add_argument("-t", "--input", required=True, help="path to input trial image (with markers)")
 ap.add_argument("-o", "--team", required=True, type=str, default="Team", help="Team name")
-ap.add_argument("-tt", "--trial", required=True, type=int, default=1, help="Trial numbber")
+ap.add_argument("-nt", "--trial", required=True, type=int, default=1, help="Trial numbber")
 # number of correct corners
 args = vars(ap.parse_args())
 
@@ -40,8 +40,8 @@ if test:
     trial_img_path=team_trials_path+args["input"]
     aruco_img_path=team_trials_path+args["ar_input"]
 else:
-    team_trials_path = "teams_trials/"+team+"/Perception/"
-    output_path="teams_trials/"+team+"/Perception/scoring/"
+    team_trials_path = "teams/"+team+"/Perception/"
+    output_path="teams/"+team+"/Perception/scoring/"
     plain_img_path=team_trials_path+args["plain"]
     trial_img_path=team_trials_path+args["input"]
     aruco_img_path=team_trials_path+args["ar_input"]
@@ -99,11 +99,11 @@ groundtruth_img, trial_gt_img, results, corners_coord, vects_end_coord = corner_
 print("Corner coordinates: ", corners_coord)
 print("Grasping vector end coordinates: ", vects_end_coord)
 ## Save results
-groundtruth_img = increase_image(groundtruth_img)
-trial_gt_img = increase_image(trial_gt_img)
-np.savetxt(output_path+"gt_corners.csv", results, fmt='%s', delimiter=",")   # Save vertices of defined contour
-cv2.imwrite(output_path+"gt.jpg", groundtruth_img)
-cv2.imwrite(output_path+"gt_trial.jpg", trial_gt_img)
+#groundtruth_img = increase_image(groundtruth_img)
+#trial_gt_img = increase_image(trial_gt_img)
+np.savetxt(output_path+"gt_corners_"+str(trial)+".csv", results, fmt='%s', delimiter=",")   # Save vertices of defined contour
+cv2.imwrite(output_path+"gt_"+str(trial)+".png", groundtruth_img)
+cv2.imwrite(output_path+"gt_trial_"+str(trial)+".png", trial_gt_img)
 
 # gt_corners_path = output_path+"gt_corners.csv"
 # gt_file = csv.reader(open(gt_corners_path))
