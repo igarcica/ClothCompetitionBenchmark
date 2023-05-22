@@ -111,6 +111,7 @@ def transform_perspective(aruco_img):
             cv2.polylines(aruco_img, int_corners, True, (0, 255, 0), 5)
             cv2.imshow('aruco', aruco_img)
             cv2.waitKey(0)
+            cv2.destroyAllWindows()
             
             # Aruco Perimeter
             aruco_perimeter = cv2.arcLength(markerCorner[0], True) # Aruco perimeter size in pixels
