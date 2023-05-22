@@ -18,9 +18,9 @@ activate_print = True
 
 # Get image with Aruco layout
 ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--ar_input", required=True, help="path to input image containing ArUCo layout")
+ap.add_argument("-a", "--ar_input", required=True, help="path to input image containing ArUCo layout")
 ap.add_argument("-p", "--plain", required=True, help="path to input plain image (without markers)")
-ap.add_argument("-t", "--input", required=True, help="path to input trial image (with markers)")
+ap.add_argument("-i", "--input", required=True, help="path to input trial image (with markers)")
 ap.add_argument("-o", "--team", required=True, type=str, default="Team", help="Team name")
 ap.add_argument("-nt", "--trial", required=True, type=int, default=1, help="Trial numbber")
 # number of correct corners

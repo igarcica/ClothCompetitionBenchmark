@@ -14,19 +14,19 @@ import px_to_cm
 import contour_annotation as contour_an
 import manipulation_scoring as scoring
 
-resize_percent = 30
+resize_percent = 80
 activate_print=False
-test=True
+test=False
 define_canonical = False
 
 # Get image with Aruco layout
 ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--ar_input", required=True, help="path to input image containing ArUCo layout")
-ap.add_argument("-x", "--can_input", required=True, help="path to input image containing flat cloth (canonical)")
-ap.add_argument("-ii", "--input", required=True, help="path to input image containing result of the trial (folded or flat cloth)")
+ap.add_argument("-a", "--ar_input", required=True, help="path to input image containing ArUCo layout")
+#ap.add_argument("-x", "--can_input", required=True, help="path to input image containing flat cloth (canonical)")
+ap.add_argument("-i", "--input", required=True, help="path to input image containing result of the trial (folded or flat cloth)")
 ap.add_argument("-o", "--team", required=True, type=str, default="Team", help="Team name")
 ap.add_argument("-t", "--task", required=True, type=str, default="u", help="Task to score: Task 2.1 Unfolding (u) ot Task 2.2. Folding (f)")
-ap.add_argument("-tt", "--trial", required=True, type=int, default=1, help="Trial number")
+ap.add_argument("-nt", "--trial", required=True, type=int, default=1, help="Trial number")
 ap.add_argument("-obj", "--object", type=str, default="med_towel", help="Object from the Household Cloth Object Set")
 #first or second fold for task folding (o f1, f2)
 args = vars(ap.parse_args())
@@ -43,6 +43,13 @@ trial = args["trial"]
 if args["task"] != "u" and args["task"] != "f" and args["task"] != "f1" and args["task"] != "f2":
     print("[INFO] Not a manipulation task. Please select unfolding (u) or folding (f). ")
     sys.exit(0)
+else:
+    if args["task"] == "u":
+        print("Evaluating Task 2.1 Unfolding")
+        task="Unfolding"
+    else:
+        print("Evaluating Task 2.2 Folding")
+        task="Folding"
 
 #Household Cloth Object Set dictionary
 CLOTH_SIZE = {
@@ -74,32 +81,81 @@ object_dims = CLOTH_SIZE.get(args["object"], None)
 if test:
     team_trials_path = "test/"
     output_path="test/scoring/"
-else:
-    team_trials_path = "teams_trials/"+team+"/Folding/"
-    output_path="teams_trials/"+team+"/Folding/scoring/"
+    trial_img_path=team_trials_path+args["input"]
+    aruco_img_path=team_trials_path+args["ar_input"]
+else: 
+    team_trials_path = "teams/"+team+"/"+task+"/"
+    output_path="teams/"+team+"/"+task+"/scoring/"
+    trial_img_path=team_trials_path+args["input"]
+    aruco_img_path=team_trials_path+args["ar_input"]
+print("Input path: ", team_trials_path)
+print("Output path: ", output_path)
 
 
 #my_file = open("vertices.csv", "wb")
 #vertices_wr = csv.writer(my_file, delimiter=",")
 
+##############################################################
+## UTIL FUNCTIONS
+
 def print_info(activate, arg1, arg2="", arg3="", arg4="", arg5="", arg6=""):
     if(activate):
         print(str(arg1) + str(arg2) + str(arg3) + str(arg4) + str(arg5) + str(arg6))
 
-# def save_results(file_name, data, img):
-#     ## Save results
-#     np.savetxt(output_path+"u_vertices.csv", u_vertices, fmt='%s', delimiter=",")   # Save vertices of defined contour
-#     text_loc = u_contour_img.shape
-#     #cv2.rectangle(u_contour_img, (int((text_loc[1]/2)-100), int(text_loc[0]-50)), (int(text_loc[1]/2), int(text_loc[0])), (255,255,255), -1)
-#     text = "Error: " + str(round(abs(u_percentage_area_error),2)) +"%"
-#     cv2.putText(u_contour_img, text, (int((text_loc[1]/2)-100), int(text_loc[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2)
-#     cv2.imwrite(output_path+"u_result.jpg", u_contour_img)                # Save image with defined contour
+##### RESIZE IMAGE to fit screen and draw GT #####
+def decrease_image(img_path):
+    print("\033[94m Reading image: \033[0m", img_path)
+    print("\033[94m Resizing image to a ", resize_percent, " % \033[0m")
+    img = cv2.imread(img_path) # Load image with aruco layout
+    print_info(activate_print, "Original image dim: ", img.shape)
+    width = int(img.shape[1] * resize_percent / 100)
+    height = int(img.shape[0] * resize_percent / 100)
+    dim = (width, height)
+    res_img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA) 
+    print_info(activate_print, "Resized image to ", resize_percent, "% -> New dim: ", res_img.shape)
 
+    return res_img
+
+def increase_image(img):
+    print("\033[94m Restoring image size: \033[0m")
+    #print_info(activate_print, "Original image dim: ", img.shape)
+    #print("\033[94m Resizing image to a ", resize_percent, " % \033[0m")
+    width = int(img.shape[1] / (resize_percent/100))
+    height = int(img.shape[0] / (resize_percent/100))
+    dim = (width, height)
+    res_img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA) 
+    print_info(activate_print, "Resized image: ", res_img.shape)
+
+    return res_img
+
+##### SAVE RESULTS #####
+def save_results(contour_vert, img, results_data):
+    print("\033[94m Saving results \033[0m")
+
+    # Save measured results
+    np.savetxt(output_path+"results_data_"+str(trial)+".csv", results_data, fmt='%s', delimiter=",")
+
+    # Save vertices of defined contour
+    np.savetxt(output_path+"vertices_"+str(trial)+".csv", contour_vert, fmt='%s', delimiter=",")   
+
+    # Save image with defined contour
+    error = results_data[2][1]
+    text_loc = img.shape
+    text = "Error: " + str(round(abs(error),2)) +"%"
+    cv2.putText(img, text, (int((text_loc[1]/2)-100), int(text_loc[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2)
+    cv2.imwrite(output_path+"result_"+str(trial)+".png", img)                
+
+
+
+##############################################################
+
+##### RESIZING IMAGES TO FIT SCREEN #####
+aruco_img = decrease_image(aruco_img_path)
+trial_img = decrease_image(trial_img_path)
 
 ##### GET PX/CM RATIO ####
 print("\033[32m GETTING PIXEL/CENTIMETER RATIO \033[0m")
-aruco_img_path=team_trials_path+args["ar_input"]
-px_cm_ratio, px_cm_area_ratio = px_to_cm.transform_perspective(aruco_img_path, resize_percent)
+px_cm_ratio, px_cm_area_ratio = px_to_cm.transform_perspective(aruco_img)
 
 
 # #### CANONICAL ####
@@ -153,38 +209,40 @@ if args["task"] == "u":
     # Get starting configuration cloth perimeter and area in pixels
     print("\032[32m DEFINE INITIAL CONFIG CONTOUR \033[0m")
     # trial_img_path=team_trials_path+"trial_start_"+str(trial)+".png"
-    trial_img_path=team_trials_path+args["input"]
-    u_contour_img, u_cloth_per_px, u_cloth_area_px, u_vertices = contour_an.draw_contour(trial_img_path, resize_percent)
+    u_contour_img, u_cloth_per_px, u_cloth_area_px, u_vertices = contour_an.draw_contour(trial_img)
     
-    print_info(activate_print, "UNFOLDED Measured cloth perimeter (px): ", u_cloth_per_px)
-    print_info(activate_print, "UNFOLDED Measured cloth area (px): ", u_cloth_area_px)
+    # print_info(activate_print, "UNFOLDED Measured cloth perimeter (px): ", u_cloth_per_px)
+    # print_info(activate_print, "UNFOLDED Measured cloth area (px): ", u_cloth_area_px)
 
     # Compute perimeter and area in cm
     print("\033[94mGetting the cloth perimeter and area\033[0m")
     u_cloth_per_cm = u_cloth_per_px/px_cm_ratio
     u_cloth_area_cm = u_cloth_area_px/px_cm_area_ratio
-    print("UNFOLDED Measured cloth perimeter (cm): ", u_cloth_per_cm)
-    print("UNFOLDED Measured cloth area (cm): ", u_cloth_area_cm)
+    # print("UNFOLDED Measured cloth perimeter (cm): ", u_cloth_per_cm)
+    # print("UNFOLDED Measured cloth area (cm): ", u_cloth_area_cm)
     
     #call unfolding scoring code
     print("\033[94mScoring Task 2.1. Unfolding!\033[0m")
     u_percentage_area_error = scoring.unfolding(object_dims, u_cloth_per_px, u_cloth_per_cm, u_cloth_area_px, u_cloth_area_cm)
 
-    ## Save results
-    np.savetxt(output_path+"u_vertices.csv", u_vertices, fmt='%s', delimiter=",")   # Save vertices of defined contour
-    text_loc = u_contour_img.shape
-    #cv2.rectangle(u_contour_img, (int((text_loc[1]/2)-100), int(text_loc[0]-50)), (int(text_loc[1]/2), int(text_loc[0])), (255,255,255), -1)
-    text = "Error: " + str(round(abs(u_percentage_area_error),2)) +"%"
-    cv2.putText(u_contour_img, text, (int((text_loc[1]/2)-100), int(text_loc[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2)
-    cv2.imwrite(output_path+"u_result.jpg", u_contour_img)                # Save image with defined contour
+    # ## Save results
+    # np.savetxt(output_path+"u_vertices.csv", u_vertices, fmt='%s', delimiter=",")   # Save vertices of defined contour
+    # text_loc = u_contour_img.shape
+    # #cv2.rectangle(u_contour_img, (int((text_loc[1]/2)-100), int(text_loc[0]-50)), (int(text_loc[1]/2), int(text_loc[0])), (255,255,255), -1)
+    # text = "Error: " + str(round(abs(u_percentage_area_error),2)) +"%"
+    # cv2.putText(u_contour_img, text, (int((text_loc[1]/2)-100), int(text_loc[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2)
+    # cv2.imwrite(output_path+"u_result.jpg", u_contour_img)                # Save image with defined contour
+
+    # Save results
+    u_results = [["Measured perimeter (cm)", u_cloth_per_cm], ["Measured area (cm)", u_cloth_area_cm], ["Area error (%)", u_percentage_area_error]] #measured perimeter (cm), measured area (cm), error area (%)
+    save_results(u_vertices, u_contour_img, u_results)
 
 #### FIRST FOLD (A/2) ####
 # Scoring for FIRST FOLD
 elif args["task"] == "f1":
     # Get cloth perimeter and area in pixels
     print("\033[32m DEFINE CONTOUR FIRST FOLD \033[0m")
-    trial_img_path=team_trials_path+args["input"]
-    f1_contour_img, f1_cloth_per_px, f1_cloth_area_px, f1_vertices = contour_an.draw_contour(trial_img_path, resize_percent)
+    f1_contour_img, f1_cloth_per_px, f1_cloth_area_px, f1_vertices = contour_an.draw_contour(trial_img)
     print_info(activate_print, "FIRST measured cloth perimeter (px): ", f1_cloth_per_px)
     print_info(activate_print, "FIRST measured cloth area (px): ", f1_cloth_area_px)
 
@@ -198,12 +256,16 @@ elif args["task"] == "f1":
     print("\033[94m Scoring Task 2.2. Folding! - First fold (A/2) \033[0m")
     f1_percentage_area_error = scoring.folding(object_dims, f1_cloth_per_px, f1_cloth_per_cm, f1_cloth_area_px, f1_cloth_area_cm)
 
-    ## Save results
-    np.savetxt(output_path+"f1_vertices.csv", f1_vertices, fmt='%s', delimiter=",") # Save defined contour
-    text_loc = f1_contour_img.shape
-    text = "Error: " + str(round(abs(f1_percentage_area_error),2)) +"%"
-    cv2.putText(f1_contour_img, text, (int((text_loc[1]/2)-100), int(text_loc[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2)
-    cv2.imwrite(output_path+"f1_result.jpg", f1_contour_img)                # Save image with defined contour
+    # ## Save results
+    # np.savetxt(output_path+"f1_vertices.csv", f1_vertices, fmt='%s', delimiter=",") # Save defined contour
+    # text_loc = f1_contour_img.shape
+    # text = "Error: " + str(round(abs(f1_percentage_area_error),2)) +"%"
+    # cv2.putText(f1_contour_img, text, (int((text_loc[1]/2)-100), int(text_loc[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2)
+    # cv2.imwrite(output_path+"f1_result.jpg", f1_contour_img)                # Save image with defined contour
+
+    # Save results
+    f1_results = [["Measured perimeter (cm)", f1_cloth_per_cm], ["Measured area (cm)", f1_cloth_area_cm], ["Area error (%)", f1_percentage_area_error]] 
+    save_results(f1_vertices, f1_contour_img, f1_results)
 
 #### SECOND FOLD (A/4) ####
 # Scoring for SECOND FOLD
@@ -211,8 +273,7 @@ elif args["task"] == "f2":
     # Get cloth perimeter and area in pixels
     print("\033[94m DEFINE CONTOUR SECOND FOLD \033[0m")
     # trial_img_path=team_trials_path+"trial_final_"+str(trial)+".png"
-    trial_img_path=team_trials_path+args["input"]
-    f2_contour_img, f2_cloth_per_px, f2_cloth_area_px, f2_vertices = contour_an.draw_contour(trial_img_path, resize_percent)
+    f2_contour_img, f2_cloth_per_px, f2_cloth_area_px, f2_vertices = contour_an.draw_contour(trial_img)
     print_info(activate_print,"SECOND FOLD  Measured cloth perimeter (px): ", f2_cloth_per_px)
     print_info(activate_print,"SECOND FOLD Measured cloth area (px): ", f2_cloth_area_px)
 
@@ -226,12 +287,16 @@ elif args["task"] == "f2":
     f2_percentage_area_error = scoring.folding2(object_dims, f2_cloth_per_px, f2_cloth_per_cm, f2_cloth_area_px, f2_cloth_area_cm)
     # print("\033[92m Seccond fold perimeter error ", f2_cloth_area_px/(can_cloth_area_px/4), "\033[0m")
 
-    ## Save results
-    np.savetxt(output_path+"f2_vertices.csv", f2_vertices, fmt='%s', delimiter=",") # Save defined contour
-    text_loc = f2_contour_img.shape
-    text = "Error: " + str(round(abs(f2_percentage_area_error),2)) +"%"
-    cv2.putText(f2_contour_img, text, (int((text_loc[1]/2)-100), int(text_loc[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2)
-    cv2.imwrite(output_path+"f2_result.jpg", f2_contour_img)                # Save image with defined contour
+    # ## Save results
+    # np.savetxt(output_path+"f2_vertices.csv", f2_vertices, fmt='%s', delimiter=",") # Save defined contour
+    # text_loc = f2_contour_img.shape
+    # text = "Error: " + str(round(abs(f2_percentage_area_error),2)) +"%"
+    # cv2.putText(f2_contour_img, text, (int((text_loc[1]/2)-100), int(text_loc[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2)
+    # cv2.imwrite(output_path+"f2_result.jpg", f2_contour_img)                # Save image with defined contour
+
+    # Save results
+    f2_results = [["Measured perimeter (cm)", f2_cloth_per_cm], ["Measured area (cm)", f2_cloth_area_cm], ["Area error (%)", f2_percentage_area_error]] 
+    save_results(f2_vertices, f2_contour_img, f2_results)
 
 
 # #### SCORING ####
