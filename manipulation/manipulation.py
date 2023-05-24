@@ -50,6 +50,10 @@ else:
     else:
         print("Evaluating Task 2.2 Folding")
         task="Folding"
+        if args["task"] == "f1":
+            tk="f1"
+        else:
+            tk="f2"
 
 #Household Cloth Object Set dictionary
 CLOTH_SIZE = {
@@ -133,17 +137,17 @@ def save_results(contour_vert, img, results_data):
     print("\033[94m Saving results \033[0m")
 
     # Save measured results
-    np.savetxt(output_path+"results_data_"+str(trial)+".csv", results_data, fmt='%s', delimiter=",")
+    np.savetxt(output_path+str(trial)+"_"+str(tk)+"_results_data"+".csv", results_data, fmt='%s', delimiter=",")
 
     # Save vertices of defined contour
-    np.savetxt(output_path+"vertices_"+str(trial)+".csv", contour_vert, fmt='%s', delimiter=",")   
+    np.savetxt(output_path+str(trial)+"_"+str(tk)+"_vertices.csv", contour_vert, fmt='%s', delimiter=",")   
 
     # Save image with defined contour
     error = results_data[2][1]
     text_loc = img.shape
     text = "Error: " + str(round(abs(error),2)) +"%"
     cv2.putText(img, text, (int((text_loc[1]/2)-100), int(text_loc[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,0), 2)
-    cv2.imwrite(output_path+"result_"+str(trial)+".png", img)                
+    cv2.imwrite(output_path+str(trial)+"_"+str(tk)+"_result.png", img)                
 
 
 
