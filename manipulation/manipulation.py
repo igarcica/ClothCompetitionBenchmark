@@ -14,7 +14,7 @@ import px_to_cm
 import contour_annotation as contour_an
 import manipulation_scoring as scoring
 
-resize_percent = 80
+resize_percent = 150
 activate_print=False
 test=False
 define_canonical = False
@@ -47,6 +47,7 @@ else:
     if args["task"] == "u":
         print("Evaluating Task 2.1 Unfolding")
         task="Unfolding"
+        tk="u"
     else:
         print("Evaluating Task 2.2 Folding")
         task="Folding"
@@ -71,7 +72,8 @@ CLOTH_SIZE = {
         "towel_rag": (50, 70),
         "linen_rag": (50, 70),
         "waffle_rag": (50, 70),
-        "chekered_rag": (50, 70)
+        "chekered_rag": (50, 70),
+        "paper": (21, 29.7)
         }
 
 if CLOTH_SIZE.get(args["object"], None) is None:
