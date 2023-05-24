@@ -14,7 +14,7 @@ import px_to_cm
 import contour_annotation as contour_an
 import manipulation_scoring as scoring
 
-resize_percent = 150
+resize_percent = 130
 activate_print=False
 test=False
 define_canonical = False
