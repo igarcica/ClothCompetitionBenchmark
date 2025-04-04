@@ -1,0 +1,21 @@
+Thanks so much for organizing this really nice competition! I hope this text here can help you better read the result!
+
+Template image ----- same resolution with aruco template
+
+The first fold was failed, and therefore, no results
+
+2_1 fold ---- Trial 2 , Fold 1
+2_2 fold ---- Trial 2 , Fold 2
+
+3_1 fold ---- Trial 3 , Fold 1
+3_2 fold ---- Trial 3 , Fold 2
+
+4_initial -----Trial 4 , initial fig
+4_1 fold ---- Trial 4 , Fold 1
+4_2 fold ---- Trial 4,  Fold 2
+
+5_initial  ----- Trial 5, due to the workspace limit, our system can not run with the large pillow
+
+6_initial -----Trial 6 , initial fig
+6_1 fold ---- Trial 6 , Fold 1
+6_2 fold ---- Trial 6,  Fold 2

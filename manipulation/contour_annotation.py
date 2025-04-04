@@ -5,35 +5,33 @@ import math
 import csv
 
 
-def Vect_Event(event, x, y, flags, param):
+def Mouse_Event(event, x, y, flags, param):
     global first, vertices, px_cm_ratio, prev_x, prev_y, contour_area, contour_perimeter
+    
     img = param
     if event == cv2.EVENT_LBUTTONDOWN:
-        if first:
+        if first: # Vertices array initialization with first point
             vertices = np.array([[x,y]])
-            cv2.circle(img, (x, y), 5, (15,75,50), -1)
+            cv2.circle(img, (x, y), 3, (255,0,0), -1)
             cv2.imshow('Draw contour', img)
             first = False
             prev_x = x
             prev_y = y
-        else:
-            #save point
+        else: # Continue filling vertices array with selected points
             vertices = np.append(vertices, np.array([[x,y]]), axis=0)
-            cv2.line(img,(prev_x,prev_y),(x,y),(255,0,0),3)
+            cv2.line(img,(prev_x,prev_y),(x,y),(255,0,0),2)
             cv2.imshow('Draw contour', img)
             prev_x = x
             prev_y = y
-    #Stop getting vertices
-    #Join last point with initial
+    #Join last point with initial + Stop getting vertices
     if event == cv2.EVENT_RBUTTONDOWN:
-        print("End drawing contour")
         pts = vertices.reshape((-1,1,2))
-        cv2.polylines(img, [pts], True, (0,0,255), 3)
+        cv2.polylines(img, [pts], True, (255,0,0), 2)
         cv2.imshow('Draw contour', img)
-#        print("Area (px): ", cv2.contourArea(vertices))
-#        print("Area (cm): ", cv2.contourArea(vertices)/px_cm_ratio_area)
-#        print("Perimeter (pc): ", cv2.arcLength(vertices, True))
-#        print("Perimeter (cm): ", cv2.arcLength(vertices, True)/px_cm_ratio)
+        # print("Area (px): ", cv2.contourArea(vertices))
+        # print("Area (cm): ", cv2.contourArea(vertices)/px_cm_ratio_area)
+        # print("Perimeter (pc): ", cv2.arcLength(vertices, True))
+        # print("Perimeter (cm): ", cv2.arcLength(vertices, True)/px_cm_ratio)
         contour_area = cv2.contourArea(vertices)
         contour_perimeter = cv2.arcLength(vertices, True)
 
@@ -42,7 +40,13 @@ def Vect_Event(event, x, y, flags, param):
 #pts = pts.reshape((-1,1,2))
 #cv2.polylines(image, [pts], True, (0,0,255), 3)
 
+<<<<<<< HEAD
 def draw_contour(img_path, resize_percent):
+=======
+def draw_contour(trial_img):
+    print("\033[96m Draw contour... \033[0m")
+
+>>>>>>> ICRA2023
     global contour_area, contour_perimeter, first
     
     #Set variables
@@ -50,6 +54,7 @@ def draw_contour(img_path, resize_percent):
     contour_area = 0
     first = True
 
+<<<<<<< HEAD
     # Image to draw contour
     img = cv2.imread(img_path)
     # Resize image so it fits on the screen
@@ -60,26 +65,40 @@ def draw_contour(img_path, resize_percent):
     dim = (width, height)
     img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
     cv2.imshow('Draw contour', img)
+=======
+    # # Image to draw contour
+    # print("\033[94m Reading image: \033[0m", img_path)
+    # img = cv2.imread(img_path)
+    # # Resize image so it fits on the screen
+    # print("Image dim: ", img.shape)
+    # scale_percent = resize_percent # percent of original size
+    # width = int(img.shape[1] * scale_percent / 100)
+    # height = int(img.shape[0] * scale_percent / 100)
+    # dim = (width, height)
+    # img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
+    cv2.imshow('Draw contour', trial_img)
+>>>>>>> ICRA2023
     
-#    filei =open('test.csv','w')
-#    writer=csv.writer(filei)
+    # filei =open('test.csv','w')
+    # writer=csv.writer(filei)
 
     # set Mouse Callback method
-    param = img
-    cv2.setMouseCallback('Draw contour', Vect_Event, param)
+    param = trial_img
+    cv2.setMouseCallback('Draw contour', Mouse_Event, param)
     
     print("\033[95m Action required! \033[0m Please, define the contour of the cloth")
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    print("\033[96m Ended drawing contour \033[0m")
 
-#    # Save points in csv
-#    filei.close()
-#    # Create folder for team (input team name)
-#    cv2.imwrite('rulebook/results/towel_wrinkle1.jpg', img) # Save with trial number
+    # # Save points in csv
+    # filei.close()
+    # # Create folder for team (input team name)
+    # cv2.imwrite('rulebook/results/towel_wrinkle1.jpg', img) # Save with trial number
     
-    contour_img = img
+    contour_img = trial_img
     
-    return contour_img, contour_perimeter, contour_area
+    return contour_img, contour_perimeter, contour_area, vertices
 
 ## Test code
 #img_path = 'test/IMG_20221007_173646.jpg'

@@ -35,24 +35,36 @@ Over image window "Corner" click on the point of the image that correspond to th
 
 In the root folder, run:
  
-``python3 perception/perception.py -i 'test/IMG_20221007_174231.jpg' -ii 'test/IMG_20221007_174207.jpg' -o 'team2' -tt 1000``
+``python3 perception/perception.py -i 'pattern.jpg' -p 'towel.jpg' -ii 'towel_markers.jpg' -o 'test' -tt 1000``
 
 ## Manipulation tasks
 
 
-All this scripts can be executed separately to execute their features.
+<!--All this scripts can be executed separately to execute their features.
 
 To set the contour of the cloth, run:
 ``python3 contour_annotation.py``
 
-To draw the contour, click in sequence the vertices that compose the contour. To close the contour press the mouse right button.
+To draw the contour, click in sequence the vertices that compose the contour. To close the contour press the mouse right button.-->
 
 ### Usage example
 
 In the root folder, run:
 
-``python3 manipulation/manipulation.py -i 'test/IMG_20221007_174231.jpg' -ii 'test/IMG_20221007_174149.jpg' -o 'team/' -t "f1" -tt 2 -obj "med_towel"``
+``python3 manipulation/manipulation.py -i 'pattern.jpg' -x 'towel.jpg' -ii 'towel.jpg' -o 'team/' -t "u" -tt 2 -obj "med_towel"``
 
 
+# Competition scoring
+
+## IDLab-AIRO team
+
+### Perception task
+
+``python3 perception/perception.py -i 'aruco_gent.png' -ii 'trial_input_1.png' -o 'IDLab-AIRO' -tt 1``
+
+
+## UMich team
+
+## AIS-Shinshu team
 
 
