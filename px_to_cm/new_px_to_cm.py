@@ -4,7 +4,7 @@ import numpy as np
 
 
 class FindHomography:
-    def __init__(self, aruco_image, original_image, trial_image, scale_factor, circle_radius=1, vector_tolerance=45, angle_lines_length=200):
+    def __init__(self, aruco_image, original_image, trial_image, scale_factor, circle_radius=2, vector_tolerance=45, angle_lines_length=200):
         """
         Initialize with:
         - 
@@ -244,54 +244,41 @@ class FindHomography:
 
                     #TODO: Print distance in image: calibration check
 
+            elif self.mode == "corner_gt":
+                ## Corner selection - paint circle
+                if len(self.clicked_points) < 2:
+                    clicked_point = (x, y)
+                    print(f"Selected pixel: {clicked_point}")
+                    clicked_point_orig = (orig_x, orig_y)
+                    # Convert clicked pixel to real-world coordinates
+                    real_world_center = self.transform_to_real_world(orig_x, orig_y)
+                    print(f"Real-world coordinates: {real_world_center}")
 
-            elif self.mode == "points_def":
-                clicked_point = (x, y)
-                print(f"Selected pixel: {clicked_point}")
-                clicked_point_orig = (orig_x, orig_y)
-                # Convert clicked pixel to real-world coordinates
-                real_world_center = self.transform_to_real_world(orig_x, orig_y)
-                print(f"Real-world coordinates: {real_world_center}")
-                print(orig_y)
-                print(clicked_point_orig[1])
+                    # Define a second point 1 cm to the right in real-world coordinates
+                    real_world_edge = (real_world_center[0] + self.circle_radius, real_world_center[1])
+                    print(real_world_edge)
 
-                # Define a second point 1 cm to the right in real-world coordinates
-                real_world_edge = (real_world_center[0] + self.circle_radius, real_world_center[1])
-                print(real_world_edge)
+                    # Compute inverse homography for mapping back to image space
+                    H_inv = np.linalg.inv(self.H) #Serves to compute pixel coord from real points
 
-                # Compute inverse homography for mapping back to image space
-                H_inv = np.linalg.inv(self.H) #Serves to compute pixel coord from real points
+                    # Convert edge point back to image coordinates
+                    image_edge = self.transform_to_image_coords(real_world_edge[0], real_world_edge[1], H_inv)
 
-                # Convert edge point back to image coordinates
-                image_edge = self.transform_to_image_coords(real_world_edge[0], real_world_edge[1], H_inv)
+                    # Compute pixel radius
+                    pixel_radius = int(np.linalg.norm(np.array(clicked_point_orig) - np.array(image_edge)))
 
-                # Compute pixel radius
-                pixel_radius = int(np.linalg.norm(np.array(clicked_point_orig) - np.array(image_edge)))
+                    # # Map from display image to original image
+                    # x_displ, y_displ = int(x * scale_factor), int(y * scale_factor)
+                    # image_point = (x_displ, y_displ)
+                    pixel_radius_display = int(pixel_radius*self.scale_factor)
 
-                # # Map from display image to original image
-                # x_displ, y_displ = int(x * scale_factor), int(y * scale_factor)
-                # image_point = (x_displ, y_displ)
-                pixel_radius_display = int(pixel_radius*self.scale_factor)
+                    # Draw the circle
+                    # s = self.display_image.copy()
+                    cv2.circle(self.display_image, clicked_point, pixel_radius_display, (255,127,0), 2)  # Print GT corners in plain image
+                    # cv2.imshow("Image with Circle", self.display_image)
+                    cv2.circle(self.trial_image, clicked_point, pixel_radius_display, (255,127,0), 2)  # Print in trial image (with the results of the team)
 
-                # Draw the circle
-                # s = self.display_image.copy()
-                cv2.circle(self.display_image, clicked_point, pixel_radius_display, (0, 0, 0), 2)  # Print GT corners in plain image
-                # cv2.imshow("Image with Circle", self.display_image)
-                cv2.circle(self.trial_image, clicked_point, pixel_radius_display, (0, 0, 0), 2)  # Print in trial image (with the results of the team)
-
-                # Reset for next selection
-                self.clicked_points.clear()
-
-                #TODO: Save image
-
-            # elif self.mode == "points_def":
-            #     if len(self.clicked_points) == 1:
-            #         radius_px = int(2 / self.scale_factor)  # Assuming 2cm converted to pixels
-            #         disp_center = (int(orig_x * self.scale_factor), int(orig_y * self.scale_factor))
-            #         cv2.circle(self.display_image, disp_center, radius_px, (0, 255, 255), 2)  # Cyan circle
-
-
-            elif self.mode == "vector":
+                #### Grasping approach vector - paint angles
                 if len(self.clicked_points) == 2:
                     p1, p2 = np.array(self.clicked_points[0]), np.array(self.clicked_points[1])
                     print(p1)
@@ -322,8 +309,8 @@ class FindHomography:
                     # cv2.line(self.display_image, disp_p1, disp_p2, (255, 0, 0), 2)  # Blue reference line
 
                     # Draw rotated lines (+-45º from p1)
-                    cv2.line(self.display_image, disp_p1, disp_endpoint1, (0, 0, 0), 2)  # Green rotated line
-                    cv2.line(self.display_image, disp_p1, disp_endpoint2, (0, 0, 0), 2)  # Green rotated line
+                    cv2.line(self.display_image, disp_p1, disp_endpoint1, (255,127,0), 2)  # Green rotated line
+                    cv2.line(self.display_image, disp_p1, disp_endpoint2, (255,127,0), 2)  # Green rotated line
 
                     # Create semi-transparent shadow
                     overlay = self.display_image.copy()
@@ -332,8 +319,8 @@ class FindHomography:
                     self.display_image = cv2.addWeighted(overlay, 0.5, self.display_image, 1 - 0.5, 0) #0.5 is the opacity
 
                     ## Print in trial image
-                    cv2.line(self.trial_image, disp_p1, disp_endpoint1, (0, 0, 0), 2)  # Green rotated line
-                    cv2.line(self.trial_image, disp_p1, disp_endpoint2, (0, 0, 0), 2)  # Green rotated line
+                    cv2.line(self.trial_image, disp_p1, disp_endpoint1, (255,127,0), 2)  # Green rotated line
+                    cv2.line(self.trial_image, disp_p1, disp_endpoint2, (255,127,0), 2)  # Green rotated line
                     overlay = self.trial_image.copy()
                     triangle_pts = np.array([disp_p1, disp_endpoint1, disp_endpoint2], np.int32)
                     cv2.fillPoly(overlay, [triangle_pts], (50, 50, 50))  # Dark gray shadow
@@ -342,6 +329,103 @@ class FindHomography:
 
                     # Reset for next selection
                     self.clicked_points.clear()
+
+
+            elif self.mode == "points_def":
+                clicked_point = (x, y)
+                print(f"Selected pixel: {clicked_point}")
+                clicked_point_orig = (orig_x, orig_y)
+                # Convert clicked pixel to real-world coordinates
+                real_world_center = self.transform_to_real_world(orig_x, orig_y)
+                print(f"Real-world coordinates: {real_world_center}")
+
+                # Define a second point 1 cm to the right in real-world coordinates
+                real_world_edge = (real_world_center[0] + self.circle_radius, real_world_center[1])
+                print(real_world_edge)
+
+                # Compute inverse homography for mapping back to image space
+                H_inv = np.linalg.inv(self.H) #Serves to compute pixel coord from real points
+
+                # Convert edge point back to image coordinates
+                image_edge = self.transform_to_image_coords(real_world_edge[0], real_world_edge[1], H_inv)
+
+                # Compute pixel radius
+                pixel_radius = int(np.linalg.norm(np.array(clicked_point_orig) - np.array(image_edge)))
+
+                # # Map from display image to original image
+                # x_displ, y_displ = int(x * scale_factor), int(y * scale_factor)
+                # image_point = (x_displ, y_displ)
+                pixel_radius_display = int(pixel_radius*self.scale_factor)
+
+                # Draw the circle
+                # s = self.display_image.copy()
+                cv2.circle(self.display_image, clicked_point, pixel_radius_display, (255,127,0), 2)  # Print GT corners in plain image
+                # cv2.imshow("Image with Circle", self.display_image)
+                cv2.circle(self.trial_image, clicked_point, pixel_radius_display, (255,127,0), 2)  # Print in trial image (with the results of the team)
+
+                # Reset for next selection
+                self.clicked_points.clear()
+
+                #TODO: Save image
+
+            # elif self.mode == "points_def":
+            #     if len(self.clicked_points) == 1:
+            #         radius_px = int(2 / self.scale_factor)  # Assuming 2cm converted to pixels
+            #         disp_center = (int(orig_x * self.scale_factor), int(orig_y * self.scale_factor))
+            #         cv2.circle(self.display_image, disp_center, radius_px, (0, 255, 255), 2)  # Cyan circle
+
+
+            # elif self.mode == "vector":
+            #     if len(self.clicked_points) == 2:
+            #         p1, p2 = np.array(self.clicked_points[0]), np.array(self.clicked_points[1])
+            #         print(p1)
+            #         direction = p2 - p1
+            #         print(direction)
+            #         direction = direction / np.linalg.norm(direction)  # Normalize
+
+            #         ## Get GT line length
+            #         # line_length = np.sqrt((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2)
+            #         # line_length = 250
+            #         # print("line length: ", line_length)
+
+            #         ## Print first line
+            #         rotated_direction1 = self.rotate_vector(direction, self.vector_tol)
+            #         endpoint1 = p1 + rotated_direction1 * self.angle_lines_length
+
+            #         ## Second line angle
+            #         rotated_direction2 = self.rotate_vector(direction, -self.vector_tol) # Rotate this direction by 45º
+            #         endpoint2 = p1 + rotated_direction2 * self.angle_lines_length # Compute the endpoint
+
+            #         # Convert to display coordinates
+            #         disp_p1 = (int(p1[0] * self.scale_factor), int(p1[1] * self.scale_factor))
+            #         disp_p2 = (int(p2[0] * self.scale_factor), int(p2[1] * self.scale_factor))
+            #         disp_endpoint1 = (int(endpoint1[0] * self.scale_factor), int(endpoint1[1] * self.scale_factor))
+            #         disp_endpoint2 = (int(endpoint2[0] * self.scale_factor), int(endpoint2[1] * self.scale_factor))
+
+            #         # Draw original reference line (p1 -> p2) 
+            #         # cv2.line(self.display_image, disp_p1, disp_p2, (255, 0, 0), 2)  # Blue reference line
+
+            #         # Draw rotated lines (+-45º from p1)
+            #         cv2.line(self.display_image, disp_p1, disp_endpoint1, (255,127,0), 2)  # Green rotated line
+            #         cv2.line(self.display_image, disp_p1, disp_endpoint2, (255,127,0), 2)  # Green rotated line
+
+            #         # Create semi-transparent shadow
+            #         overlay = self.display_image.copy()
+            #         triangle_pts = np.array([disp_p1, disp_endpoint1, disp_endpoint2], np.int32)
+            #         cv2.fillPoly(overlay, [triangle_pts], (50, 50, 50))  # Dark gray shadow
+            #         self.display_image = cv2.addWeighted(overlay, 0.5, self.display_image, 1 - 0.5, 0) #0.5 is the opacity
+
+            #         ## Print in trial image
+            #         cv2.line(self.trial_image, disp_p1, disp_endpoint1, (255,127,0), 2)  # Green rotated line
+            #         cv2.line(self.trial_image, disp_p1, disp_endpoint2, (255,127,0), 2)  # Green rotated line
+            #         overlay = self.trial_image.copy()
+            #         triangle_pts = np.array([disp_p1, disp_endpoint1, disp_endpoint2], np.int32)
+            #         cv2.fillPoly(overlay, [triangle_pts], (50, 50, 50))  # Dark gray shadow
+            #         self.trial_image = cv2.addWeighted(overlay, 0.4, self.trial_image, 1 - 0.4, 0) #0.5 is the opacity
+
+
+            #         # Reset for next selection
+            #         self.clicked_points.clear()
     
             elif self.mode == "draw_contour":
                 if len(self.clicked_points) > 1:
@@ -383,12 +467,12 @@ class FindHomography:
             
             if key == 27:  # ESC to exit
                 break
-            elif key == ord('1'):
-                self.set_mode("distance")
-            elif key == ord('2'):
-                self.set_mode("circle")
-            elif key == ord('3'):
-                self.set_mode("angle")
+            # elif key == ord('1'):
+            #     self.set_mode("distance")
+            # elif key == ord('2'):
+            #     self.set_mode("circle")
+            # elif key == ord('3'):
+            #     self.set_mode("angle")
 
         cv2.destroyAllWindows()
 

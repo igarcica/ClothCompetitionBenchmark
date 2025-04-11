@@ -4,30 +4,39 @@ import sys
 sys.path.insert(1, './px_to_cm/')
 import new_px_to_cm
 
+
+
 save_imgs = True
 trial = 2
 corner_tolerance = 2 #Circle radius
 appr_vector_tolerance = 45
 angle_line_length = 70
-max_display_size = 1500  # Max width or height for display
+# max_display_size = 1500  # Max width or height for display
 object_name = "linen_napkin" 
-task = "folding2" 
+task = "unfolding" 
 
-## Output directory
-# output_path = "./results/"
-output_path = "IROS2022/Shinshu/Unfolding/scoring/"
-input_path =  "IROS2022/Shinshu/Unfolding/"
 
-# Load image
-image_path = input_path + "UR5e_system_aruco_image.png"
+#### TEAM SETTINGS
+
+## ---IDLab-AIRO 2023:
+output_path = "ICRA2023/IDLab-AIRO/Unfolding/scoring/"
+input_path =  "ICRA2023/IDLab-AIRO/Unfolding/"
+image_path = input_path + "competition_marker.png"
+original_image_path = input_path + "1_post-unfolding.jpg"
+max_display_size = 1500  # Max width or height for display
+
+# ## ---Shinshu
+# output_path = "IROS2022/Shinshu/Unfolding/scoring/"
+# input_path =  "IROS2022/Shinshu/Unfolding/"
+# image_path = input_path + "UR5e_system_aruco_image.png"
+# original_image_path = input_path + "image_0.png"
+# max_display_size = 1500  # Max width or height for display
+
+
+# Load images
 aruco_image = cv2.imread(image_path)
-
-original_image_path = input_path + "image_0.png" #"trial_start_1.png" #str(trial)+ "_pre-fold.jpg"
 original_image = cv2.imread(original_image_path)
-
-trial_image_path = input_path +str(trial)+ "_pre-fold.jpg"
 trial_image = cv2.imread(trial_image_path)
-
 
 # # Resize for display (scale to fit screen)
 h, w = aruco_image.shape[:2]
@@ -56,6 +65,7 @@ CLOTH_SIZE = {
 # object_dims = CLOTH_SIZE.get(args["object"], None)
 object_dims = CLOTH_SIZE.get(object_name, None)
 print("Object flat dimensions", object_dims)
+
 
 def rescale_image(image, max_display_size):
     # Resize for display (scale to fit screen)
