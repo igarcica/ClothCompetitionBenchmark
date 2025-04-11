@@ -14,14 +14,6 @@ import px_to_cm
 import contour_annotation as contour_an
 import manipulation_scoring as scoring
 
-<<<<<<< HEAD
-resize_percent = 100 
-
-# Get image with Aruco layout
-ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--ar_input", required=True, help="path to input image containing ArUCo layout")
-ap.add_argument("-ii", "--input", required=True, help="path to input image containing result of the trial (folded or flat cloth)")
-=======
 resize_percent = 130
 activate_print=False
 test=False
@@ -32,7 +24,6 @@ ap = argparse.ArgumentParser()
 ap.add_argument("-a", "--ar_input", required=True, help="path to input image containing ArUCo layout")
 #ap.add_argument("-x", "--can_input", required=True, help="path to input image containing flat cloth (canonical)")
 ap.add_argument("-i", "--input", required=True, help="path to input image containing result of the trial (folded or flat cloth)")
->>>>>>> ICRA2023
 ap.add_argument("-o", "--team", required=True, type=str, default="Team", help="Team name")
 ap.add_argument("-t", "--task", required=True, type=str, default="u", help="Task to score: Task 2.1 Unfolding (u) ot Task 2.2. Folding (f)")
 ap.add_argument("-nt", "--trial", required=True, type=int, default=1, help="Trial number")
@@ -45,10 +36,7 @@ if not os.path.exists(args["team"]):
 #    os.mkdir("./ " + args["team"])
     os.mkdir(args["team"])
 team = args["team"]
-<<<<<<< HEAD
-=======
 print(team)
->>>>>>> ICRA2023
 
 trial = args["trial"]
 
@@ -193,17 +181,6 @@ px_cm_ratio, px_cm_area_ratio = px_to_cm.transform_perspective(aruco_img)
 #     print("CANONICAL Measured cloth perimeter (cm): ", can_cloth_per_cm)
 #     print("CANONICAL Measured cloth area (cm): ", can_cloth_area_cm)
 
-<<<<<<< HEAD
-# Get px/cm ratio
-print("\033[94m GETTING PIXEL/CENTIMETER RATIO \033[0m")
-px_cm_ratio, px_cm_area_ratio = px_to_cm.transform_perspective(args["ar_input"], resize_percent)
-
-# Get cloth perimeter and area in pixels
-print("\033[94m DEFINE CONTOUR \033[0m")
-contour_img, cloth_per_px, cloth_area_px = contour_an.draw_contour(args["input"], resize_percent)
-print("Measured cloth perimeter (px): ", cloth_per_px)
-print("Measured cloth area (px): ", cloth_area_px)
-=======
 #     #Save defined contour for next trials
 #     np.savetxt("can_vertices.csv", can_vertices.astype(int), fmt="%s", delimiter=",")
 #     #print("Defined can vertices: ", can_vertices)
@@ -221,7 +198,6 @@ print("Measured cloth area (px): ", cloth_area_px)
     
 #     print_info(activate_print, "CANONICAL Measured cloth perimeter (px): ", can_cloth_per_px)
 #     print_info(activate_print, "CANONICAL Measured cloth area (px): ", can_cloth_area_px)
->>>>>>> ICRA2023
 
 #     # Compute perimeter and area in cm
 #     can_cloth_per_cm = can_cloth_per_px/px_cm_ratio
@@ -253,38 +229,6 @@ if args["task"] == "u":
     
     #call unfolding scoring code
     print("\033[94mScoring Task 2.1. Unfolding!\033[0m")
-<<<<<<< HEAD
-    task="Unfolding"
-    size = (50,90)
-    scoring.unfolding(CLOTH_SIZE.get(args["object"], None), cloth_per_cm)
-elif args["task"] == "f1":
-    #call folding scoring code
-    print("\033[94mScoring Task 2.2. Folding!\033[0m")
-    task="Folding"
-    scoring.folding(CLOTH_SIZE.get(args["object"], None), cloth_per_cm, cloth_area_cm, 2)
-elif args["task"] == "f2":
-    #call folding scoring code
-    print("\033[94mScoring Task 2.2. Folding, second fold!\033[0m")
-    task="Folding"
-    scoring.folding(CLOTH_SIZE.get(args["object"], None), cloth_per_cm, cloth_area_cm, 4)
-else:
-    print("[INFO] Not a manipulation task. Please select unfolding (u) or folding (f). ")
-    sys.exit(0)
-
-of="team_trials/"+team+"/"+task+"/scoring"
-# Save results
-# Contour image
-cv2.imwrite(team + "/trial" + str(trial) + "_cont.jpg", contour_img) # Save with trial number
-# Measured perimeter and area
-filei =open(team + "/trial" + str(trial) + '.csv','w')
-writer=csv.writer(filei)
-row = [px_cm_ratio, px_cm_area_ratio, cloth_per_px, cloth_area_px, cloth_per_cm, cloth_area_cm]
-writer.writerow(row)
-# Info trial (team, trial, config, object, ...), Ratios, perimeter + area (in px and cm), error, points
-#Towel Area: 4500cm2 = 45cm2, Perimeter: 280cm
-
-filei.close()
-=======
     u_percentage_area_error = scoring.unfolding(object_dims, u_cloth_per_px, u_cloth_per_cm, u_cloth_area_px, u_cloth_area_cm)
 
     # ## Save results
@@ -402,4 +346,3 @@ elif args["task"] == "f2":
 ##TODO
 # Compare area with initial!
 # Take into account the % of elasticity of each cloth. The sizes in CLOTH_SIZE should be with +- a percentage. Error should be 0% when it is inside this tolerance (due to elasticity)
->>>>>>> ICRA2023

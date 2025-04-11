@@ -4,35 +4,40 @@ import numpy as np
 
 
 class FindHomography:
-    def __init__(self, aruco_image, original_image, trial_image, circle_radius=1, vector_tolerance=45, angle_lines_length=200):
+    def __init__(self, aruco_image, original_image, trial_image, scale_factor, circle_radius=1, vector_tolerance=45, angle_lines_length=200):
         """
         Initialize with:
         - 
         """
-        self.aruco_image = aruco_image
-        # self.scale_factor = scale_factor
+        self.aruco_image = aruco_image # To get homography
+        self.original_image = original_image # To draw the groundtruth
+        self.trial_image = trial_image  # To save the groundtruth in the trial image
+        self.display_image = original_image #To see the image
+
+        self.scale_factor = scale_factor
         self.H = 0
         self.clicked_points = []
 
-        self.original_image = original_image
-        self.trial_image = trial_image
-        # self.scale_factor = scale_factor
-        # Resize for display (scale to fit screen)
-        max_display_size = 10000  # Max width or height for display
-        h, w = original_image.shape[:2]
-        self.scale_factor = max_display_size / max(h, w)  # Compute the scale factor
-        self.display_image = cv2.resize(self.original_image, (int(w * self.scale_factor), int(h * self.scale_factor)))
-        # self.display_image = original_image.copy()
-    
-        self.aruco_image = cv2.resize(self.aruco_image, (int(w * self.scale_factor), int(h * self.scale_factor)))
-        cv2.imshow("Image with Circle", self.aruco_image)
 
-        # Resize trial image
-        self.trial_image = cv2.resize(self.trial_image, (int(w * self.scale_factor), int(h * self.scale_factor)))
+        # # self.scale_factor = scale_factor
+        # # Resize for display (scale to fit screen)
+        # max_display_size = 1500  # Max width or height for display
+        # h, w = original_image.shape[:2]
+        # self.scale_factor = max_display_size / max(h, w)  # Compute the scale factor
+        # self.display_image = cv2.resize(self.original_image, (int(w * self.scale_factor), int(h * self.scale_factor)))
+        # # self.display_image = original_image.copy()
+    
+        # self.aruco_image = cv2.resize(self.aruco_image, (int(w * self.scale_factor), int(h * self.scale_factor)))
+        # cv2.imshow("Image with Circle", self.aruco_image)
+
+        # # Resize trial image
+        # self.trial_image = cv2.resize(self.trial_image, (int(w * self.scale_factor), int(h * self.scale_factor)))
 
         self.circle_radius = circle_radius
         self.vector_tol = vector_tolerance
         self.angle_lines_length = angle_lines_length
+        self.area_cm = 0
+        self.perimeter_cm = 0
 
     def find_homography(self):
 
@@ -67,7 +72,6 @@ class FindHomography:
         for i, marker_id in enumerate(ids):
             # Extract the first corner of the marker
             marker_corner = corners[i][0][0]
-            print(marker_corner)
 
             # Calculate relative position based on marker ID
             row = (marker_id-10) // 3  # Assuming a 3x3 grid
@@ -79,9 +83,30 @@ class FindHomography:
             world_points.append((world_x, world_y)) 
             image_points.append(marker_corner) 
 
+        print(world_points)
+        print(image_points)
+        
         # Convert to NumPy arrays
         image_points = np.array(image_points, dtype=np.float32) #Center point of the markers in the real world, considering that the first marker is initialized as (0,0)#Center point of the markers in the real world, considering that the first marker is initialized as (0,0)
         world_points = np.array(world_points, dtype=np.float32) #Pixel center points of the markers
+
+        print(world_points)
+        print(image_points)
+        
+        # Compute homography (Perspective Transformation)
+        self.H, _ = cv2.findHomography(image_points, world_points) #This serves to compute image coord into real point
+    
+    def manual_homography(self, world_points, image_points):
+
+        print(world_points)
+        print(image_points)
+
+        # Convert to NumPy arrays
+        image_points = np.array(image_points, dtype=np.float32) #Center point of the markers in the real world, considering that the first marker is initialized as (0,0)#Center point of the markers in the real world, considering that the first marker is initialized as (0,0)
+        world_points = np.array(world_points, dtype=np.float32) #Pixel center points of the markers
+
+        print(world_points)
+        print(image_points)
 
         # Compute homography (Perspective Transformation)
         self.H, _ = cv2.findHomography(image_points, world_points) #This serves to compute image coord into real point
@@ -127,11 +152,71 @@ class FindHomography:
         ])
         return np.dot(rotation_matrix, vector)
 
+    def polygon_area_cm2(self, world_points):
+        """
+        Compute area in cm² using shoelace formula.
+        world_points: list of (x, y) tuples in cm
+        """
+        pts = np.array(world_points)
+        x = pts[:, 0]
+        y = pts[:, 1]
+        area = 0.5 * np.abs(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1)))
+        return area
+
+    def polygon_perimeter_cm(self, world_points):
+        """
+        Compute the perimeter of a polygon given its vertices in cm.
+        :param world_points: list of (x, y) tuples in cm
+        :return: perimeter in cm
+        """
+        pts = np.array(world_points)
+        diffs = np.diff(np.vstack([pts, pts[0]]), axis=0)  # close the polygon loop
+        distances = np.linalg.norm(diffs, axis=1)
+        return np.sum(distances)
+
+
     def image_interaction(self, event, x, y, flags, param):
         """Mouse callback function to handle different actions based on the mode."""
+        if event == cv2.EVENT_RBUTTONDOWN: #Close contour
+            # vertices = np.array(self.clicked_points, dtype=np.int32).reshape(-1, 1, 2) #transform from list [(,), (,),..] to array [[,], [,],..]  of shape ROWSx1x2 
+            # cv2.polylines(self.display_image, vertices, True, (255,0,0), 2)
+            # contour_area = cv2.contourArea(vertices)
+            # contour_perimeter = cv2.arcLength(vertices, True)
+
+            # Convert pixel points to real-world using homography
+            pts = np.array(self.clicked_points, dtype=np.float32)
+            pts_homogeneous = cv2.perspectiveTransform(pts.reshape(-1, 1, 2), self.H)
+            world_points = [tuple(pt[0]) for pt in pts_homogeneous]
+
+            # Compute perimeter in cm
+            self.perimeter_cm = self.polygon_perimeter_cm(world_points)
+            print(f"Perimeter: {self.perimeter_cm:.2f} cm")
+
+            # Compute area in cm²
+            self.area_cm = self.polygon_area_cm2(world_points)
+            print(f"Polygon Area: {self.area_cm:.2f} cm²")
+
+            # Draw the filled polygon on a transparent overlay
+            disp_pts = np.array(
+                [[int(x * self.scale_factor), int(y * self.scale_factor)] for (x, y) in self.clicked_points],
+                np.int32
+            )
+
+            overlay = self.display_image.copy()
+            cv2.polylines(overlay, [disp_pts], isClosed=True, color=(0, 255, 0), thickness=2)
+            cv2.fillPoly(overlay, [disp_pts], (0, 255, 0))
+            self.display_image = cv2.addWeighted(overlay, 0.5, self.display_image, 1 - 0.5, 0)
+
+            # Optionally display text
+            centroid = np.mean(disp_pts, axis=0).astype(int)
+            cv2.putText(self.display_image, f"{self.area_cm:.2f} cm2", tuple(centroid),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)           
+
+
         if event == cv2.EVENT_LBUTTONDOWN:
             orig_x, orig_y = self.display_to_original(x, y)
             self.clicked_points.append((orig_x, orig_y))
+
 
             if self.mode == "distance":
                 if len(self.clicked_points) == 2:
@@ -157,7 +242,7 @@ class FindHomography:
                     # Reset for next selection
                     self.clicked_points.clear()
 
-                    #TODO: Print distance in image
+                    #TODO: Print distance in image: calibration check
 
 
             elif self.mode == "points_def":
@@ -257,17 +342,40 @@ class FindHomography:
 
                     # Reset for next selection
                     self.clicked_points.clear()
+    
+            elif self.mode == "draw_contour":
+                if len(self.clicked_points) > 1:
+                    length = len(self.clicked_points)
+                    print(len(self.clicked_points))
+                    print(self.clicked_points[length-1])
+                    ##Draw line between current and past points
+                    p1, p2 = np.array(self.clicked_points[length-2]), np.array(self.clicked_points[length-1])
+                    distance_px = np.linalg.norm(p2 - p1)
+                    print(f"Distance (pixels): {distance_px:.2f}")
+
+                    # Convert to display coordinates and draw line
+                    disp_p1 = (int(p1[0] * self.scale_factor), int(p1[1] * self.scale_factor))
+                    disp_p2 = (int(p2[0] * self.scale_factor), int(p2[1] * self.scale_factor))
+                    cv2.line(self.display_image, disp_p1, disp_p2, (0, 128, 255), 2)  #(255, 255, 0) Yellow line 
+                    # if close_contour: #Close contour
+                    #     # pts = vertices.reshape((-1,1,2))
+                    #     cv2.polylines(img, clicked_points, True, (255,0,0), 2)
+                    #     contour_area = cv2.contourArea(vertices)
+                    #     contour_perimeter = cv2.arcLength(vertices, True)
+
+            # elif self.mode == "draw_contour": 
+            #     cv2.circle(self.display_image, (x, y), 3, (0, 128, 255), -1)
 
             # Show updated image
             cv2.imshow("Interactive Drawing", self.display_image)
             
 
-    def run(self):
+    def run(self, img_msg):
         """Main function to run the interactive window."""
         cv2.namedWindow("Interactive Drawing", cv2.WINDOW_NORMAL)
         cv2.setMouseCallback("Interactive Drawing", self.image_interaction)
 
-        print("Press '1' for Distance Mode, '2' for Circle Mode, '3' for Angle Mode.")
+        # print("Press '1' for Distance Mode, '2' for Circle Mode, '3' for Angle Mode.")
         
         while True:
             cv2.imshow("Interactive Drawing", self.display_image)

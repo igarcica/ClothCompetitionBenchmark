@@ -4,7 +4,6 @@ import numpy as np
 import sys
 sys.path.insert(1, './px_to_cm/')
 import new_px_to_cm
-import image_interaction
 
 save_imgs = True
 trial = 1

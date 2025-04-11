@@ -1,3 +1,6 @@
-Measured perimeter (cm),114.1234433620096
-Measured area (cm),866.2441414571795
-Area error (%),-15.499218860957264
+Real perimeter (cm),110
+Real area (cm),750
+Measured perimeter (cm),110.06691
+Measured area (cm),796.938232421875
+Fold error (%),6.25843098958334
+IoT match (%),94

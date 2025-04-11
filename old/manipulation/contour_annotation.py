@@ -40,13 +40,9 @@ def Mouse_Event(event, x, y, flags, param):
 #pts = pts.reshape((-1,1,2))
 #cv2.polylines(image, [pts], True, (0,0,255), 3)
 
-<<<<<<< HEAD
-def draw_contour(img_path, resize_percent):
-=======
 def draw_contour(trial_img):
     print("\033[96m Draw contour... \033[0m")
 
->>>>>>> ICRA2023
     global contour_area, contour_perimeter, first
     
     #Set variables
@@ -54,18 +50,6 @@ def draw_contour(trial_img):
     contour_area = 0
     first = True
 
-<<<<<<< HEAD
-    # Image to draw contour
-    img = cv2.imread(img_path)
-    # Resize image so it fits on the screen
-    print("Image dim: ", img.shape)
-    scale_percent = resize_percent # percent of original size
-    width = int(img.shape[1] * scale_percent / 100)
-    height = int(img.shape[0] * scale_percent / 100)
-    dim = (width, height)
-    img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
-    cv2.imshow('Draw contour', img)
-=======
     # # Image to draw contour
     # print("\033[94m Reading image: \033[0m", img_path)
     # img = cv2.imread(img_path)
@@ -77,7 +61,6 @@ def draw_contour(trial_img):
     # dim = (width, height)
     # img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
     cv2.imshow('Draw contour', trial_img)
->>>>>>> ICRA2023
     
     # filei =open('test.csv','w')
     # writer=csv.writer(filei)
