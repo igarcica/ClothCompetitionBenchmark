@@ -203,14 +203,14 @@ class FindHomography:
             )
 
             overlay = self.display_image.copy()
-            cv2.polylines(overlay, [disp_pts], isClosed=True, color=(0, 255, 0), thickness=2)
+            cv2.polylines(overlay, [disp_pts], isClosed=True, color=(0, 100, 0), thickness=3)
             cv2.fillPoly(overlay, [disp_pts], (0, 255, 0))
-            self.display_image = cv2.addWeighted(overlay, 0.5, self.display_image, 1 - 0.5, 0)
+            self.display_image = cv2.addWeighted(overlay, 0.4, self.display_image, 1 - 0.4, 0)
 
-            # Optionally display text
-            centroid = np.mean(disp_pts, axis=0).astype(int)
-            cv2.putText(self.display_image, f"{self.area_cm:.2f} cm2", tuple(centroid),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)           
+            # Print area
+            # centroid = np.mean(disp_pts, axis=0).astype(int)
+            # cv2.putText(self.display_image, f"{self.area_cm:.2f} cm2", tuple(centroid),
+            #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)           
 
 
         if event == cv2.EVENT_LBUTTONDOWN:
@@ -440,7 +440,7 @@ class FindHomography:
                     # Convert to display coordinates and draw line
                     disp_p1 = (int(p1[0] * self.scale_factor), int(p1[1] * self.scale_factor))
                     disp_p2 = (int(p2[0] * self.scale_factor), int(p2[1] * self.scale_factor))
-                    cv2.line(self.display_image, disp_p1, disp_p2, (0, 128, 255), 2)  #(255, 255, 0) Yellow line 
+                    cv2.line(self.display_image, disp_p1, disp_p2, (0, 100, 0), 2)  #(255, 255, 0) Yellow line #orhange (0, 128, 255)
                     # if close_contour: #Close contour
                     #     # pts = vertices.reshape((-1,1,2))
                     #     cv2.polylines(img, clicked_points, True, (255,0,0), 2)

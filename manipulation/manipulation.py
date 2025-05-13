@@ -6,37 +6,79 @@ import new_px_to_cm
 
 
 
-save_imgs = True
-trial = 2
-corner_tolerance = 2 #Circle radius
-appr_vector_tolerance = 45
+save_imgs = False
+trial = 6
+corner_tolerance = 3 # +- corner tolerance (circle radius)
+appr_vector_tolerance = 45 #+- angle tolerance
 angle_line_length = 70
-# max_display_size = 1500  # Max width or height for display
-object_name = "linen_napkin" 
-task = "unfolding" 
+object_name = "small_towel" 
+task = "folding2" 
 
 
 #### TEAM SETTINGS
 
-## ---IDLab-AIRO 2023:
-output_path = "ICRA2023/IDLab-AIRO/Unfolding/scoring/"
-input_path =  "ICRA2023/IDLab-AIRO/Unfolding/"
-image_path = input_path + "competition_marker.png"
-original_image_path = input_path + "1_post-unfolding.jpg"
-max_display_size = 1500  # Max width or height for display
+# # ---Shinshu
+output_path = "IROS2022/Shinshu/Folding/scoring/"
+input_path =  "IROS2022/Shinshu/Folding/"
+image_path =  input_path + "hiro_system_aruco_image.png" #input_path + "UR5e_system_aruco_image.png"
+original_image_path = input_path + "image_0.png" #"2022_10_20_16_22_50.png"
+# original_image_path = input_path + "one_folding_image_3.png"
+max_display_size = 1000  # Max width or height for display
+text_x = -100
+text_y = 100
 
-# ## ---Shinshu
-# output_path = "IROS2022/Shinshu/Unfolding/scoring/"
-# input_path =  "IROS2022/Shinshu/Unfolding/"
-# image_path = input_path + "UR5e_system_aruco_image.png"
-# original_image_path = input_path + "image_0.png"
+# ## ---IDLab-AIRO 2023:
+# ##Folding
+# output_path = "ICRA2023/IDLab-AIRO/Folding/scoring/"
+# input_path =  "ICRA2023/IDLab-AIRO/Folding/"
+# image_path = input_path + "competition_marker.png" # Aruco marker image
+# # original_image_path = input_path + "1_post-unfolding.jpg"
+# # original_image_path = input_path + "000" + str(trial) + "_first_fold.png"
+# original_image_path = input_path + "000" + str(trial) + "_final.png"
 # max_display_size = 1500  # Max width or height for display
+# text_x = -55
+# # text_x = 0
+# # text_y = -50
+# text_y = 100
+# ##Unfolding
+# output_path = "ICRA2023/IDLab-AIRO/Unfolding/scoring/"
+# input_path =  "ICRA2023/IDLab-AIRO/Unfolding/"
+# image_path = input_path + "competition_marker.png" # Aruco marker image
+# original_image_path = input_path + "1_post-unfolding.jpg"
+# max_display_size = 1500  # Max width or height for display
+# # text_x = -20 #napkin
+# # text_y = 50
+# text_x = 50
+# text_y = 70
+
+# ## ---Imperial REDS 2023:
+# output_path = "ICRA2023/Imperial-REDS/Folding/scoring/"
+# input_path =  "ICRA2023/Imperial-REDS/Folding/"
+# image_path = input_path + "template_image.jpg" # Aruco marker image
+# # original_image_path = input_path + "1_post-unfolding.jpg"
+# original_image_path = input_path + str(trial) + "_1_fold.png"
+# # original_image_path = input_path + "000" + str(trial) + "_final.png"
+# max_display_size = 1200  # Max width or height for display
+# # text_x = 100
+# # text_y = 0
+# text_x = -120
+# text_y = 220
+
+# ## ---Aalto:
+# output_path = "ICRA2023/Aalto/Unfolding/scoring/"
+# input_path =  "ICRA2023/Aalto/Unfolding/"
+# image_path = input_path + "calibration.jpeg" # Aruco marker image
+# original_image_path = input_path + "3_cotton_napkin_end.jpeg"
+# max_display_size = 2000  # Max width or height for display
+# text_x = -100
+# text_y = -150
+
 
 
 # Load images
 aruco_image = cv2.imread(image_path)
 original_image = cv2.imread(original_image_path)
-trial_image = cv2.imread(trial_image_path)
+# trial_image = cv2.imread(trial_image_path)
 
 # # Resize for display (scale to fit screen)
 h, w = aruco_image.shape[:2]
@@ -176,6 +218,11 @@ if task == "unfolding":
     u_coverage, u_percentage_area_error = unfolding_coverage(object_dims, area_cm)
     #Save image
     u_contour_img = px_to_cm.display_image
+
+    text = "Coverage: " + str(round(abs(u_coverage))) +"%"
+    text_loc = u_contour_img.shape
+    cv2.putText(u_contour_img, text, (int((text_loc[1]/2)+text_x), int((text_loc[0]/2+text_y))), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 100, 0), 2) #blue (255,0,0)
+
     cv2.imwrite(output_path+"trial_gt_"+str(trial)+".png", u_contour_img)
     # Save results
     u_results = [["Real perimeter (cm)", real_perimeter_cm], ["Real area (cm)", real_area_cm], ["Measured perimeter (cm)", px_to_cm.perimeter_cm], ["Measured area (cm)", px_to_cm.area_cm], ["Coverage (%)", u_coverage], ["Area error (%)", u_percentage_area_error]] 
@@ -194,10 +241,16 @@ elif task == "folding1": #First fold
     real_area_cm = (object_dims[0]*object_dims[1])/2
     f1_percentage_fold_error = fold_iot_error(real_perimeter_cm, real_area_cm, measured_area_cm)
 
+
     #Save image
-    f1_contour_img = px_to_cm.display_image
-    cv2.imwrite(output_path+str(trial)+"_f1_trial_gt.png", f1_contour_img)
+    f1_contour_img = px_to_cm.display_image 
+    text = "Error: " + str(round(abs(f1_percentage_fold_error))) +"%"
+    text_loc = f1_contour_img.shape
+    cv2.putText(f1_contour_img, text, (int((text_loc[1]/2)+text_x), int((text_loc[0]/2+text_y))), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 100, 0), 2) #blue (255,0,0)
+    # cv2.imshow("Image", f1_contour_img)
+
     # Save results
+    cv2.imwrite(output_path+str(trial)+"_f1_trial_gt.png", f1_contour_img)
     f1_results = [["Real perimeter (cm)", real_perimeter_cm], ["Real area (cm)", real_area_cm], ["Measured perimeter (cm)", px_to_cm.perimeter_cm], ["Measured area (cm)", px_to_cm.area_cm], ["Fold error (%)", f1_percentage_fold_error]] 
     save_results(f1_vertices, f1_contour_img, f1_results)
 
@@ -217,8 +270,16 @@ elif task == "folding2":
 
     #Save image
     f2_contour_img = px_to_cm.display_image
-    cv2.imwrite(output_path+str(trial)+"_f2_trial_gt.png", f2_contour_img)
+    text_loc = f2_contour_img.shape
+    text = "Error: " + str(round(abs(f2_percentage_fold_error))) +"%"
+    cv2.putText(f2_contour_img, text, (int((text_loc[1]/2)+text_x), int((text_loc[0]/2)+text_y)), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 100, 0), 2) #blue (255,0,0)
+
     # Save results
+    cv2.imwrite(output_path+str(trial)+"_f2_trial_gt.png", f2_contour_img)
     f2_results = [["Real perimeter (cm)", real_perimeter_cm], ["Real area (cm)", real_area_cm], ["Measured perimeter (cm)", px_to_cm.perimeter_cm], ["Measured area (cm)", px_to_cm.area_cm], ["Fold error (%)", f2_percentage_fold_error]] 
     save_results(f2_vertices, f2_contour_img, f2_results)
 
+
+
+# elif task == "draw_contours":
+#     #Read csv

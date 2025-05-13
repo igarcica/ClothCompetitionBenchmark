@@ -7,7 +7,7 @@ import new_px_to_cm
 
 
 save_imgs = True
-trial = 9
+trial = 5
 corner_tolerance = 2 #Circle radius
 appr_vector_tolerance = 45
 angle_line_length = 70
